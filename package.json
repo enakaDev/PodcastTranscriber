@@ -9,7 +9,6 @@
     "@hono/zod-validator": "^0.4.3",
     "@types/node": "^22.14.0",
     "axios": "^1.8.4",
-    "deepl-node": "^1.17.3",
     "fast-xml-parser": "^5.2.1",
     "hono": "^4.7.5",
     "node-fetch": "^3.3.2",

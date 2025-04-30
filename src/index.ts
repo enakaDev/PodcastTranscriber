@@ -4,7 +4,6 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import { XMLParser } from 'fast-xml-parser'
 import  {  createClient  }  from  "@deepgram/sdk" ; 
-import * as deepl from 'deepl-node';
 
 type Bindings = {
   DEEPGRAM_API_KEY: string,
@@ -73,6 +72,13 @@ app.post('/episodes', zValidator('json', rssSchema), async (c) => {
   }
 });
 
+interface TranslateResponse {
+  translations: {
+    detected_source_language: string;
+    text: string;
+  }[];
+}
+
 app.post('/transcribe', zValidator('json', audioSchema), async (c) => {
   const { audioUrl } = await c.req.json()
 
@@ -94,16 +100,34 @@ app.post('/transcribe', zValidator('json', audioSchema), async (c) => {
 
     const data = await result.results.channels[0].alternatives[0].transcript
 
+    const res = await fetch(`https://api-free.deepl.com/v2/translate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `DeepL-Auth-Key ${c.env.DEEPL_API_KEY}`,
+      },
+      body: JSON.stringify({
+        text: [data],
+        source_lang: 'EN', // 翻訳元の言語コード
+        target_lang: 'JA', // 翻訳先の言語コード
+      }),
+    });
+    const translatedResponse: TranslateResponse = await res.json();
+
     //const translator = new deepl.Translator(c.env.DEEPL_API_KEY);
+    //const translatedText = await translator.translateText(data, "en", "ja")
     // 暫定
+    /*
     const translatedText = {
       text: ""
     };
+    */
+    
 
     return c.json({ 
       transcription: {
         original: data,
-        translation: translatedText.text
+        translation: translatedResponse.translations[0].text
       }
     })
   } catch (error: any) {
