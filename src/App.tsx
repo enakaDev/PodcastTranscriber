@@ -65,8 +65,8 @@ export default function SpotifyToRSS() {
     setError("");
     setTranscription({ original: "", translation: "" });
 
-    //const url = "https://transcriber.workers.dev/"
-    const url = "http://localhost:8787/"
+    const url = "https://transcriber.workers.dev/"
+    //const url = "http://localhost:8787/"
 
     try {
       const response = await fetch(`${url}transcribe`, {
