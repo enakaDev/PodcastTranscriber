@@ -1,0 +1,126 @@
+import { Hono } from 'hono'
+import { cors } from 'hono/cors'
+import { zValidator } from '@hono/zod-validator'
+import { z } from 'zod'
+import { XMLParser } from 'fast-xml-parser'
+import  {  createClient  }  from  "@deepgram/sdk" ; 
+import * as deepl from 'deepl-node';
+
+type Bindings = {
+  DEEPGRAM_API_KEY: string,
+  DEEPL_API_KEY: string,
+  RSS_LINKS: {
+    name: string,
+    url: string
+  }[]
+}
+
+const app = new Hono<{ Bindings: Bindings }>()
+app.use('*', cors()) // CORS有効化
+
+// URL バリデーション用
+const rssSchema = z.object({
+	rssUrl: z.string().url(),
+})
+
+// URL バリデーション用
+const audioSchema = z.object({
+	audioUrl: z.string().url(),
+})
+
+
+export async function fetchAndParseRSS(url: string) {
+  // 1. fetchでRSSフィードを取得
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch RSS feed: ${response.status}`)
+  }
+
+  const xmlText = await response.text()
+
+  // 2. fast-xml-parser でパース
+  const parser = new XMLParser({
+    ignoreAttributes: false
+  })
+  const parsed = parser.parse(xmlText)
+
+  // 3. RSSフィードの中身にアクセスできる
+  return parsed
+}
+app.post('/episodes', zValidator('json', rssSchema), async (c) => {
+  const { rssUrl } = await c.req.json()
+
+  try {
+    const feed = await fetchAndParseRSS(rssUrl);
+    if (!feed.rss.channel.item || feed.rss.channel.item.length === 0) {
+      return c.json({ error: "No items found in RSS feed" }, 400);
+    }
+
+    const items: any[] = feed.rss.channel.item
+
+    return c.json({ 
+      episodes: items.map(item => {
+        return {
+          title: item.title,
+          audioUrl: item.enclosure["@_url"],
+          description: item.description
+        }
+      })
+    })
+  } catch (error: any) {
+    console.error("Error during transcription:", error);
+    return c.json({ error: "Transcription failed", details: error.stack }, 500);
+  }
+});
+
+app.post('/transcribe', zValidator('json', audioSchema), async (c) => {
+  const { audioUrl } = await c.req.json()
+
+  try {
+    // Deepgram API へリクエスト
+    const deepgramClient = createClient (c.env.DEEPGRAM_API_KEY);
+    const {result, error} = await deepgramClient.listen.prerecorded.transcribeUrl(
+      {
+        url: audioUrl,
+      },
+      {
+        model: "nova",
+        paragraphs: true,
+      }
+    );
+    if (error) {
+      return c.json({ error: "Deepgram API error", details: error }, 500);
+    }
+
+    const data = await result.results.channels[0].alternatives[0].transcript
+
+    //const translator = new deepl.Translator(c.env.DEEPL_API_KEY);
+    // 暫定
+    const translatedText = {
+      text: ""
+    };
+
+    return c.json({ 
+      transcription: {
+        original: data,
+        translation: translatedText.text
+      }
+    })
+  } catch (error: any) {
+    console.error("Error during transcription:", error);
+    return c.json({ error: "Transcription failed", details: error.stack }, 500);
+  }
+});
+
+app.get('/rss-list', async (c) => {
+  try {
+    // 環境変数からRSSのURLリストを取得
+    const rssList = c.env.RSS_LINKS ?? [];
+    return c.json({ rssList });
+  } catch (error: any) {
+    console.error("Error fetching RSS list:", error);
+    return c.json({ error: "Failed to fetch RSS list", details: error.stack }, 500);
+  }
+});
+
+export default app
