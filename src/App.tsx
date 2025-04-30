@@ -149,8 +149,8 @@ export default function SpotifyToRSS() {
         >
           {loading ? "実行中..." : "文字起こし実行"}
         </button>
-        {error && <p className="text-red-500 mt-4">⚠️ {error}</p>}
       </div>
+      {error && <p className="text-red-500 mt-4">⚠️ {error}</p>}
       {transcription && (
         <div className="mt-4">
           <h3>文字起こし結果:</h3>
