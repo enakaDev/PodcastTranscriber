@@ -126,7 +126,6 @@ export default function SpotifyToRSS() {
       >
         {loading ? "実行中..." : "エピソード取得"}
       </button>
-      {error && <p className="text-red-500 mt-4">⚠️ {error}</p>}
       </div>
       <div>
         <h3>エピソードを選択:</h3>
@@ -150,6 +149,7 @@ export default function SpotifyToRSS() {
         >
           {loading ? "実行中..." : "文字起こし実行"}
         </button>
+        {error && <p className="text-red-500 mt-4">⚠️ {error}</p>}
       </div>
       {transcription && (
         <div className="mt-4">
