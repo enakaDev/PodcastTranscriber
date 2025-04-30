@@ -26,8 +26,9 @@ export default function SpotifyToRSS() {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [selectedAudioUrl, setSelectedAudioUrl] = useState<string>("");
 
-  const url = "https://backend.transcriber.workers.dev/"
-  //const url = "http://localhost:8787/"
+  // 環境変数をインポート
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const url = backendUrl;
 
   useEffect(() => {
     // サーバーからRSSリストを取得
@@ -94,7 +95,7 @@ export default function SpotifyToRSS() {
   return (
     <div className="app-container">
       <h1 className="app-title">Podcast Transcriber</h1>
-
+      <h2>{url}</h2>
       <div className="rss-section">
         <h2>チャンネルを選択</h2>
         <select 
