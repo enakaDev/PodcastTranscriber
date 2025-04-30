@@ -186,6 +186,12 @@ export default function SpotifyToRSS() {
             value={transcription.translation}
             readOnly
           />
+          <button
+            className="copy-button"
+            onClick={() => copyToClipboard()}
+          >
+            クリップボードにコピー
+          </button>
         </div>
       )}
     </div>
