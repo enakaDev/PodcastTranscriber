@@ -9,6 +9,7 @@ body {
 
 /* #root のスタイルを調整 */
 #root {
+  min-width: 768px;
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
@@ -33,8 +34,9 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* ボタンのスタイルを追加 */
+/* ボタンのサイズを統一する */
 button {
+  min-width: 150px; /* 最小幅を設定 */
   padding: 0.75em 1.5em;
   font-size: 1rem;
   color: #ffffff;
@@ -43,6 +45,7 @@ button {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
+  text-align: center;
 }
 button:hover {
   background-color: #535bf2;
@@ -81,17 +84,18 @@ a:hover {
 /* ドロップダウンの幅を一定にする */
 .rss-dropdown,
 .episode-dropdown {
-  width: 300px; /* 幅を一定に設定 */
+  width: 500px; /* 幅を一定に設定 */
   padding: 0.5rem;
   font-size: 1rem;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }
 
 /* input (type="text") の幅を一定にする */
 input[type="text"] {
-  width: 280px; /* 幅を一定に設定 */
+  width: 480px; /* 幅を一定に設定 */
   padding: 0.5rem;
   font-size: 1rem;
   border: 1px solid #e0e0e0;
@@ -102,6 +106,7 @@ input[type="text"] {
 /* レスポンシブデザインの追加 */
 @media (max-width: 768px) {
   #root {
+    min-width: 90%; /* モバイルでは幅を100%に */
     padding: 1rem;
   }
 
@@ -123,4 +128,46 @@ input[type="text"] {
   .translation-textarea {
     height: 200px; /* モバイルでは高さを少し小さく */
   }
+}
+
+/* カード状のスタイルを追加 */
+details {
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+details h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+summary {
+  display: block;
+  cursor: pointer;
+}
+
+.rss-section {
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.episode-section {
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  transition: transform 0.2s, box-shadow 0.2s;
 }

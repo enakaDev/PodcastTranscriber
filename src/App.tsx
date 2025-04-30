@@ -86,18 +86,23 @@ export default function SpotifyToRSS() {
     }
   };
 
+  //クリップボードにコピー関数
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(transcription.original);
+  };
+
   return (
     <div className="app-container">
       <h1 className="app-title">Podcast Transcriber</h1>
 
       <div className="rss-section">
-        <h2>RSSフィードを選択</h2>
+        <h2>チャンネルを選択</h2>
         <select 
           className="rss-dropdown"
           value={rssUrl}
           onChange={(e) => setRssUrl(e.target.value)}
         >
-          <option value="">RSSフィードを選択</option>
+          <option value="">チャンネルを選択</option>
           {rssList.map((rss, index) => (
             <option key={index} value={rss.url}>
               {rss.name}
@@ -111,7 +116,10 @@ export default function SpotifyToRSS() {
         >
           {loading ? "実行中..." : "エピソード取得"}
         </button>
-        <h2>新しいRSSフィードを入力</h2>
+      </div>
+      <div className="new-rss-section">
+        <details>
+        <summary><h2>新しいチャンネルを入力</h2></summary>
         <input
           type="text"
           className="w-full p-2 border rounded mb-4"
@@ -124,8 +132,9 @@ export default function SpotifyToRSS() {
           onClick={fetchEpisodes}
           disabled={!rssUrl || loading}
         >
-          {loading ? "実行中..." : "エピソード取得"}
+          {loading ? "実行中..." : "追加"}
         </button>
+        </details>
       </div>
 
       { episodes.length > 0 && (<div className="episode-section">
@@ -160,6 +169,12 @@ export default function SpotifyToRSS() {
             value={transcription.original}
             readOnly
           />
+          <button
+            className="copy-button"
+            onClick={() => copyToClipboard()}
+          >
+            クリップボードにコピー
+          </button>
         </div>
       )}
 
