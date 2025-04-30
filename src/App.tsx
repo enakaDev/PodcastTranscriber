@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import "./App.css";
 
 interface Episode {
   title: string;
@@ -86,48 +87,51 @@ export default function SpotifyToRSS() {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-xl">
-      <h2 className="text-xl font-bold mb-4">Podcast 文字起こし</h2>
-      <h3>RSSフィードを選択</h3>
-      <select 
-        value={rssUrl}
-        onChange={(e) => setRssUrl(e.target.value)}
-      >
-        <option value="">RSSフィードを選択</option>
-        {rssList.map((rss, index) => (
-          <option key={index} value={rss.url}>
-            {rss.name}
-          </option>
-        ))}
-      </select>
-      <button
-        className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
-        onClick={fetchEpisodes}
-        disabled={!rssUrl || loading}
-      >
-        {loading ? "実行中..." : "エピソード取得"}
-      </button>
-      <div>
-      <h3>新しいRSSフィードを入力</h3>
-      <input
-        type="text"
-        className="w-full p-2 border rounded mb-4"
-        placeholder="新しいRSSフィードのURLを入力"
-        value={rssUrl}
-        onChange={(e) => setRssUrl(e.target.value)}
-      />
-      <button
-        className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
-        onClick={fetchEpisodes}
-        disabled={!rssUrl || loading}
-      >
-        {loading ? "実行中..." : "エピソード取得"}
-      </button>
-      </div>
-      <div>
-        <h3>エピソードを選択:</h3>
-        <select
+    <div className="app-container">
+      <h1 className="app-title">Podcast Transcriber</h1>
+
+      <div className="rss-section">
+        <h2>RSSフィードを選択</h2>
+        <select 
+          className="rss-dropdown"
+          value={rssUrl}
+          onChange={(e) => setRssUrl(e.target.value)}
+        >
+          <option value="">RSSフィードを選択</option>
+          {rssList.map((rss, index) => (
+            <option key={index} value={rss.url}>
+              {rss.name}
+            </option>
+          ))}
+        </select>
+        <button
+          className="primary-button"
+          onClick={fetchEpisodes}
+          disabled={!rssUrl || loading}
+        >
+          {loading ? "実行中..." : "エピソード取得"}
+        </button>
+        <h2>新しいRSSフィードを入力</h2>
+        <input
+          type="text"
           className="w-full p-2 border rounded mb-4"
+          placeholder="RSSフィードのURLを入力"
+          value={rssUrl}
+          onChange={(e) => setRssUrl(e.target.value)}
+        />
+        <button
+          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+          onClick={fetchEpisodes}
+          disabled={!rssUrl || loading}
+        >
+          {loading ? "実行中..." : "エピソード取得"}
+        </button>
+      </div>
+
+      <div className="episode-section">
+        <h2>エピソードを選択</h2>
+        <select
+          className="episode-dropdown"
           onChange={(e) => setSelectedAudioUrl(e.target.value)}
         >
           <option value="">エピソードを選択</option>
@@ -138,35 +142,34 @@ export default function SpotifyToRSS() {
           ))}
         </select>
         <button
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
-          onClick={() => {
-            fetchTranscription(selectedAudioUrl);
-          }}
+          className="primary-button"
+          onClick={() => fetchTranscription(selectedAudioUrl)}
           disabled={loading}
         >
           {loading ? "実行中..." : "文字起こし実行"}
         </button>
       </div>
-      {error && <p className="text-red-500 mt-4">⚠️ {error}</p>}
-      {transcription && (
-        <div className="mt-4">
-          <h3>文字起こし結果:</h3>
+
+      {error && <p className="error-message">⚠️ {error}</p>}
+
+      {transcription.original && (
+        <div className="transcription-section">
+          <h2>文字起こし結果</h2>
           <textarea
-            className="w-full p-2 border rounded mb-4"
+            className="transcription-textarea"
             value={transcription.original}
             readOnly
-            rows={10}
           />
         </div>
       )}
-      {transcription && (
-        <div className="mt-4">
-          <h3>翻訳結果:</h3>
+
+      {transcription.translation && (
+        <div className="translation-section">
+          <h2>翻訳結果</h2>
           <textarea
-            className="w-full p-2 border rounded mb-4"
+            className="translation-textarea"
             value={transcription.translation}
             readOnly
-            rows={10}
           />
         </div>
       )}
