@@ -95,7 +95,6 @@ export default function SpotifyToRSS() {
   return (
     <div className="app-container">
       <h1 className="app-title">Podcast Transcriber</h1>
-      <h2>{url}</h2>
       <div className="rss-section">
         <h2>チャンネルを選択</h2>
         <select 
