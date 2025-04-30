@@ -128,7 +128,7 @@ export default function SpotifyToRSS() {
         </button>
       </div>
 
-      <div className="episode-section">
+      { episodes.length > 0 && (<div className="episode-section">
         <h2>エピソードを選択</h2>
         <select
           className="episode-dropdown"
@@ -148,7 +148,7 @@ export default function SpotifyToRSS() {
         >
           {loading ? "実行中..." : "文字起こし実行"}
         </button>
-      </div>
+      </div>)}
 
       {error && <p className="error-message">⚠️ {error}</p>}
 

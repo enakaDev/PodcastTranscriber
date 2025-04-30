@@ -106,9 +106,12 @@ input[type="text"] {
   }
 
   .rss-dropdown,
-  .episode-dropdown,
-  input[type="text"] {
+  .episode-dropdown {
     width: 100%; /* モバイルでは幅を100%に */
+  }
+
+  input[type="text"] {
+    width: 95%; /* モバイルでは幅を100%に */
   }
 
   button {
