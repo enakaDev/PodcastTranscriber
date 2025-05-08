@@ -11,7 +11,8 @@ type Bindings = {
   RSS_LINKS: {
     name: string,
     url: string
-  }[]
+  }[],
+  DB: D1Database;
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -112,17 +113,7 @@ app.post('/transcribe', zValidator('json', audioSchema), async (c) => {
         target_lang: 'JA', // 翻訳先の言語コード
       }),
     });
-    const translatedResponse: TranslateResponse = await res.json();
-
-    //const translator = new deepl.Translator(c.env.DEEPL_API_KEY);
-    //const translatedText = await translator.translateText(data, "en", "ja")
-    // 暫定
-    /*
-    const translatedText = {
-      text: ""
-    };
-    */
-    
+    const translatedResponse: TranslateResponse = await res.json();    
 
     return c.json({ 
       transcription: {
@@ -138,13 +129,46 @@ app.post('/transcribe', zValidator('json', audioSchema), async (c) => {
 
 app.get('/rss-list', async (c) => {
   try {
-    // 環境変数からRSSのURLリストを取得
-    const rssList = c.env.RSS_LINKS ?? [];
+    const result = await c.env.DB.prepare('SELECT * FROM podcasts ORDER BY created_at DESC').all();
+    const rssList = result.results.map((row) => ({
+      url: row.rss_url,
+      name: row.title,
+    }));
+    //const rssList = c.env.RSS_LINKS ?? [];
     return c.json({ rssList });
   } catch (error: any) {
     console.error("Error fetching RSS list:", error);
     return c.json({ error: "Failed to fetch RSS list", details: error.stack }, 500);
   }
 });
+
+app.post('/api/podcasts', async (c) => {
+  const body = await c.req.json()
+
+  const parsed = rssSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid request body' }, 400)
+  }
+  
+  const rss_url = parsed.data.rssUrl
+
+  try {
+    const feed = await fetchAndParseRSS(rss_url);
+    if (!feed.rss.channel.item || feed.rss.channel.item.length === 0) {
+      return c.json({ error: "No items found in RSS feed" }, 400);
+    }
+
+    const title = feed.rss.item[0].title;
+
+    await c.env.DB.prepare(
+      'INSERT INTO podcasts (rss_url, title, description) VALUES (?, ?, ?)'
+    ).bind(rss_url, title).run()
+  
+    return c.json({ message: 'Podcast registered' }, 201)
+  } catch (error: any) {
+    console.error("Error during podcast registration:", error);
+    return c.json({ error: "Registration failed", details: error.stack }, 500);
+  }
+})
 
 export default app

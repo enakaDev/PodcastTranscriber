@@ -23,7 +23,14 @@
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "D1",
+      "database_name": "podcasts-db",
+      "database_id": "podcastsdb"
+    }
+  ],
   // "kv_namespaces": [
   //   {
   //     "binding": "MY_KV_NAMESPACE",
