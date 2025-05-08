@@ -20,6 +20,7 @@ interface Transcription {
 export default function SpotifyToRSS() {
   const [rssList, setRssList] = useState<RssList[]>([]);
   const [rssUrl, setRssUrl] = useState("");
+  const [newRssUrl, setNewRssUrl] = useState("");
   const [transcription, setTranscription] = useState<Transcription>({ original: "", translation: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -87,6 +88,31 @@ export default function SpotifyToRSS() {
     }
   };
 
+  const registerChannel = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch(`${url}channel-register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newRssUrl })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || "登録に失敗しました"); 
+      }
+      fetch(`${url}rss-list`)
+      .then((response) => response.json())
+      .then((data) => setRssList(data.rssList || []))
+      .catch((error) => console.error('Error fetching RSS list:', error));
+    } catch (err) {
+      setError("エラーが発生しました");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   //クリップボードにコピー関数
   const copyToClipboard = () => {
     navigator.clipboard.writeText(transcription.original);
@@ -119,18 +145,18 @@ export default function SpotifyToRSS() {
       </div>
       <div className="new-rss-section">
         <details>
-        <summary><h2>新しいチャンネルを入力</h2></summary>
+        <summary><h2>新しいチャンネルを登録</h2></summary>
         <input
           type="text"
           className="w-full p-2 border rounded mb-4"
           placeholder="RSSフィードのURLを入力"
-          value={rssUrl}
-          onChange={(e) => setRssUrl(e.target.value)}
+          value={newRssUrl}
+          onChange={(e) => setNewRssUrl(e.target.value)}
         />
         <button
           className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
-          onClick={fetchEpisodes}
-          disabled={!rssUrl || loading}
+          onClick={registerChannel}
+          disabled={!newRssUrl || loading}
         >
           {loading ? "実行中..." : "追加"}
         </button>
