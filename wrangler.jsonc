@@ -26,9 +26,9 @@
   },
   "d1_databases": [
     {
-      "binding": "D1",
+      "binding": "DB",
       "database_name": "podcasts-db",
-      "database_id": "podcastsdb"
+      "database_id": "303efd41-7544-402c-9251-6cdcebcb3d1f"
     }
   ],
   // "kv_namespaces": [
