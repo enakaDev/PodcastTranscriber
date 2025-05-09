@@ -122,45 +122,50 @@ export default function SpotifyToRSS() {
     <div className="app-container">
       <h1 className="app-title">Podcast Transcriber</h1>
       <div className="rss-section">
-        <h2>チャンネルを選択</h2>
-        <select 
-          className="rss-dropdown"
-          value={rssUrl}
-          onChange={(e) => setRssUrl(e.target.value)}
-        >
-          <option value="">チャンネルを選択</option>
-          {rssList.map((rss, index) => (
-            <option key={index} value={rss.url}>
-              {rss.name}
-            </option>
-          ))}
-        </select>
-        <button
-          className="primary-button"
-          onClick={fetchEpisodes}
-          disabled={!rssUrl || loading}
-        >
-          {loading ? "実行中..." : "エピソード取得"}
-        </button>
-      </div>
-      <div className="new-rss-section">
-        <details>
-        <summary><h2>新しいチャンネルを登録</h2></summary>
-        <input
-          type="text"
-          className="w-full p-2 border rounded mb-4"
-          placeholder="RSSフィードのURLを入力"
-          value={newRssUrl}
-          onChange={(e) => setNewRssUrl(e.target.value)}
-        />
-        <button
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
-          onClick={registerChannel}
-          disabled={!newRssUrl || loading}
-        >
-          {loading ? "実行中..." : "追加"}
-        </button>
-        </details>
+      <h2>Podcastチャンネルを選択</h2>
+        <div className="pre-registered-rss-section">
+          <h2>登録済のチャンネルから選択</h2>
+          <select 
+            className="rss-dropdown"
+            value={rssUrl}
+            onChange={(e) => setRssUrl(e.target.value)}
+          >
+            <option value="">チャンネルを選択</option>
+            {rssList.map((rss, index) => (
+              <option key={index} value={rss.url}>
+                {rss.name}
+              </option>
+            ))}
+          </select>
+          <button
+            className="primary-button"
+            onClick={fetchEpisodes}
+            disabled={!rssUrl || loading}
+          >
+            {loading ? "実行中..." : "エピソード取得"}
+          </button>
+        </div>
+        <div className="new-rss-section">
+          <details>
+          <summary><h2>
+            新しいチャンネルを登録<span className="icon"></span>
+          </h2></summary>
+          <input
+            type="text"
+            className="w-full p-2 border rounded mb-4"
+            placeholder="RSSフィードのURLを入力"
+            value={newRssUrl}
+            onChange={(e) => setNewRssUrl(e.target.value)}
+          />
+          <button
+            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+            onClick={registerChannel}
+            disabled={!newRssUrl || loading}
+          >
+            {loading ? "実行中..." : "追加"}
+          </button>
+          </details>
+        </div>
       </div>
 
       { episodes.length > 0 && (<div className="episode-section">
