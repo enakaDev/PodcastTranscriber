@@ -8,8 +8,9 @@ interface Episode {
 }
 
 interface RssList {
-  name: string;
-  url: string;
+  id: number;
+  rss_url: string;
+  title: string;
 }
 
 interface Transcription {
@@ -21,6 +22,7 @@ export default function SpotifyToRSS() {
   const [rssList, setRssList] = useState<RssList[]>([]);
   const [rssUrl, setRssUrl] = useState("");
   const [newRssUrl, setNewRssUrl] = useState("");
+  const [delRssId, setDelRssId] = useState("");
   const [transcription, setTranscription] = useState<Transcription>({ original: "", translation: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -113,6 +115,31 @@ export default function SpotifyToRSS() {
     }
   }
 
+  const deleteChannel = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch(`${url}channel-delete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ delRssId })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || "削除に失敗しました"); 
+      }
+      fetch(`${url}rss-list`)
+      .then((response) => response.json())
+      .then((data) => setRssList(data.rssList || []))
+      .catch((error) => console.error('Error deleting RSS list:', error));
+    } catch (err) {
+      setError("エラーが発生しました");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   //クリップボードにコピー関数
   const copyToClipboard = () => {
     navigator.clipboard.writeText(transcription.original);
@@ -132,8 +159,8 @@ export default function SpotifyToRSS() {
           >
             <option value="">チャンネルを選択</option>
             {rssList.map((rss, index) => (
-              <option key={index} value={rss.url}>
-                {rss.name}
+              <option key={index} value={rss.rss_url}>
+                {rss.title}
               </option>
             ))}
           </select>
@@ -163,6 +190,32 @@ export default function SpotifyToRSS() {
             disabled={!newRssUrl || loading}
           >
             {loading ? "実行中..." : "追加"}
+          </button>
+          </details>
+        </div>
+        <div className="new-rss-section">
+          <details>
+          <summary><h2>
+            登録済のチャンネルを削除<span className="icon"></span>
+          </h2></summary>
+          <select 
+            className="rss-dropdown"
+            value={delRssId}
+            onChange={(e) => setDelRssId(e.target.value)}
+          >
+            <option value="">チャンネルを選択</option>
+            {rssList.map((rss, index) => (
+              <option key={index} value={rss.id}>
+                {rss.title}
+              </option>
+            ))}
+          </select>
+          <button
+            className="primary-button"
+            onClick={deleteChannel}
+            disabled={!delRssId || loading}
+          >
+            {loading ? "実行中..." : "チャンネル削除"}
           </button>
           </details>
         </div>
