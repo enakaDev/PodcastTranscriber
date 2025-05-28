@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./App.css";
 
 interface Episode {
@@ -28,6 +28,8 @@ export default function SpotifyToRSS() {
   const [error, setError] = useState("");
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [selectedAudioUrl, setSelectedAudioUrl] = useState<string>("");
+
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
 
   // 環境変数をインポート
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -244,6 +246,13 @@ export default function SpotifyToRSS() {
       </div>)}
 
       {error && <p className="error-message">⚠️ {error}</p>}
+
+      {selectedAudioUrl && (
+        <div className="audio-player-section">
+          <h2>エピソードを再生</h2>
+          <audio ref={audioPlayerRef} src={selectedAudioUrl} controls className="audio-player" />
+        </div>
+      )}
 
       {transcription.original && (
         <div className="transcription-section">

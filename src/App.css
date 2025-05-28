@@ -224,3 +224,10 @@ details[open] .icon {
   margin-bottom: 1rem;
   transition: transform 0.2s, box-shadow 0.2s;
 }
+
+/* オーディオプレイヤーの横幅を広げる */
+.audio-player {
+  width: 100%; /* 横幅を100%に設定 */
+  max-width: 600px; /* 最大幅を600pxに設定 */
+  margin: 0 auto; /* 中央揃え */
+}
