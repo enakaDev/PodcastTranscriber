@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { zValidator } from '@hono/zod-validator'
-import { z } from 'zod'
+import { number, z } from 'zod'
 import { XMLParser } from 'fast-xml-parser'
 import  {  createClient  }  from  "@deepgram/sdk" ; 
 
@@ -93,6 +93,7 @@ app.post('/transcribe', zValidator('json', audioSchema), async (c) => {
         {
             model: "nova",
             paragraphs: true,
+            diarize: true
         }
         );
         if (error) {
@@ -100,6 +101,7 @@ app.post('/transcribe', zValidator('json', audioSchema), async (c) => {
         }
 
         const data = await result.results.channels[0].alternatives[0].transcript
+        const segments = await result.results.channels[0].alternatives[0].paragraphs?.paragraphs.flatMap(p => p.sentences)
 
         const res = await fetch(`https://api-free.deepl.com/v2/translate`, {
             method: 'POST',
@@ -113,11 +115,12 @@ app.post('/transcribe', zValidator('json', audioSchema), async (c) => {
                 target_lang: 'JA', // 翻訳先の言語コード
             }),
         });
-        const translatedResponse: TranslateResponse = await res.json();    
+        const translatedResponse: TranslateResponse = await res.json(); 
 
         return c.json({ 
             transcription: {
                 original: data,
+                segments : segments,
                 translation: translatedResponse.translations[0].text
             }
         })
