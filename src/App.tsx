@@ -160,11 +160,6 @@ export default function SpotifyToRSS() {
     navigator.clipboard.writeText(transcription.original);
   };
 
-  // 現在の再生位置に基づいてセグメントを取得
-  //const currentSegmentIndex = transcription.segments.findIndex(
-  //  (seg) => currentTime >= seg.start && currentTime < seg.end
-  //);
-
   useEffect(() => {
     if (transcription.segments.length === 0) return;
 
@@ -325,25 +320,27 @@ export default function SpotifyToRSS() {
       </div>
     )}
 
-      {transcription.segments.length > 0 && (
+      {selectedAudioUrl && (
         <div className="audio-player-section">
           <h2>エピソードを再生</h2>
           <audio ref={audioPlayerRef} src={selectedAudioUrl} controls className="audio-player" />
         </div>
       )}
 
-      <p></p>
-      <div className="transcription-flow">
-        {transcription.segments.map((seg, i) => (
-          <div
-            key={i}
-            id={`segment-${i}`}
-            className={i === currentSegmentIndex ? "bg-yellow-200" : ""}
-          >
-            {seg.text}
-          </div>
-        ))}
-      </div>
+      <p></p> 
+      { transcription.segments.length > 0 && (
+        <div className="transcription-flow">
+          {transcription.segments.map((seg, i) => (
+            <div
+              key={i}
+              id={`segment-${i}`}
+              className={i === currentSegmentIndex ? "bg-yellow-200" : ""}
+            >
+              {seg.text}
+            </div>
+          ))}
+        </div>
+      )} 
 
     </div>
   );

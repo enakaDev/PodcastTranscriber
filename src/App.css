@@ -237,7 +237,7 @@ details[open] .icon {
   background: #ffffff;
   border: 1px solid #e0e0e0;
   width: 100%;
-  max-width: 650px;
+  max-width: 600px;
   margin: 0 auto; /* ブロック全体を中央揃えに */
   display: flex;
   flex-direction: column;
