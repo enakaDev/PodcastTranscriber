@@ -231,3 +231,26 @@ details[open] .icon {
   max-width: 600px; /* 最大幅を600pxに設定 */
   margin: 0 auto; /* 中央揃え */
 }
+
+.transcription-flow {
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto; /* ブロック全体を中央揃えに */
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 1rem; /* 要素間のスペースを追加 */
+}
+
+.result-detail h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.bg-yellow-200 {
+  background-color: #fefce8; /* 明るい黄色 */
+}

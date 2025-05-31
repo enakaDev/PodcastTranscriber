@@ -16,6 +16,7 @@ interface RssList {
 interface Transcription {
   original: string;
   translation: string;
+  segments: { start: number; end: number; text: string }[];
 }
 
 export default function SpotifyToRSS() {
@@ -23,13 +24,25 @@ export default function SpotifyToRSS() {
   const [rssUrl, setRssUrl] = useState("");
   const [newRssUrl, setNewRssUrl] = useState("");
   const [delRssId, setDelRssId] = useState("");
-  const [transcription, setTranscription] = useState<Transcription>({ original: "", translation: "" });
+  const [transcription, setTranscription] = useState<Transcription>({ original: "", translation: "", segments: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [selectedAudioUrl, setSelectedAudioUrl] = useState<string>("");
+  const [currentTime, setCurrentTime] = useState(0);
+  const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
 
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+  useEffect(() => {
+    const audio = audioPlayerRef.current;
+    if (!audio) return;
+
+    const handler = () => {
+      setCurrentTime(audio.currentTime);
+    };
+    audio.addEventListener("timeupdate", handler);
+    return () => audio.removeEventListener("timeupdate", handler);
+  }, [selectedAudioUrl]);
 
   // 環境変数をインポート
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -70,7 +83,7 @@ export default function SpotifyToRSS() {
   const fetchTranscription = async (audioUrl: string) => {
     setLoading(true);
     setError("");
-    setTranscription({ original: "", translation: "" });
+    setTranscription({ original: "", translation: "", segments: [] });
 
     try {
       const response = await fetch(`${url}transcribe`, {
@@ -146,6 +159,28 @@ export default function SpotifyToRSS() {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(transcription.original);
   };
+
+  // 現在の再生位置に基づいてセグメントを取得
+  //const currentSegmentIndex = transcription.segments.findIndex(
+  //  (seg) => currentTime >= seg.start && currentTime < seg.end
+  //);
+
+  useEffect(() => {
+    if (transcription.segments.length === 0) return;
+
+    const index = transcription.segments.findIndex(
+      (seg) => currentTime >= seg.start && currentTime < seg.end
+    );
+
+    if (index !== -1) {
+      setCurrentSegmentIndex(index);
+    }
+  }, [currentTime, transcription.segments]);
+  
+  useEffect(() => {
+    const el = document.getElementById(`segment-${currentSegmentIndex}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [currentSegmentIndex]);
 
   return (
     <div className="app-container">
@@ -247,46 +282,69 @@ export default function SpotifyToRSS() {
 
       {error && <p className="error-message">⚠️ {error}</p>}
 
-      {selectedAudioUrl && (
+      { (transcription.translation && transcription.original) &&  (
+        <div className="result-detail">
+        <details>
+          <summary><h2>
+            結果詳細<span className="icon"></span>
+          </h2></summary>
+        {transcription.original && (
+          <div className="transcription-section">
+            <h2>文字起こし結果</h2>
+            <textarea
+              className="transcription-textarea"
+              value={transcription.original}
+              readOnly
+            />
+            <button
+              className="copy-button"
+              onClick={() => copyToClipboard()}
+            >
+              クリップボードにコピー
+            </button>
+          </div>
+        )}
+
+        {transcription.translation && (
+          <div className="translation-section">
+            <h2>翻訳結果</h2>
+            <textarea
+              className="translation-textarea"
+              value={transcription.translation}
+              readOnly
+            />
+            <button
+              className="copy-button"
+              onClick={() => copyToClipboard()}
+            >
+              クリップボードにコピー
+            </button>
+          </div>
+        )}
+        </details>
+      </div>
+    )}
+
+      {transcription.segments.length > 0 && (
         <div className="audio-player-section">
           <h2>エピソードを再生</h2>
           <audio ref={audioPlayerRef} src={selectedAudioUrl} controls className="audio-player" />
         </div>
       )}
 
-      {transcription.original && (
-        <div className="transcription-section">
-          <h2>文字起こし結果</h2>
-          <textarea
-            className="transcription-textarea"
-            value={transcription.original}
-            readOnly
-          />
-          <button
-            className="copy-button"
-            onClick={() => copyToClipboard()}
+      <p></p>
+      <div className="transcription-flow">
+        {transcription.segments.map((seg, i) => (
+          <div
+            key={i}
+            id={`segment-${i}`}
+            className={i === currentSegmentIndex ? "bg-yellow-200" : ""}
           >
-            クリップボードにコピー
-          </button>
-        </div>
-      )}
+            {seg.text}
+          </div>
+        ))}
+      </div>
 
-      {transcription.translation && (
-        <div className="translation-section">
-          <h2>翻訳結果</h2>
-          <textarea
-            className="translation-textarea"
-            value={transcription.translation}
-            readOnly
-          />
-          <button
-            className="copy-button"
-            onClick={() => copyToClipboard()}
-          >
-            クリップボードにコピー
-          </button>
-        </div>
-      )}
     </div>
   );
 }
