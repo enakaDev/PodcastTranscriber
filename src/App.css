@@ -272,3 +272,8 @@ details[open] .icon {
 .bg-yellow-200 {
   background-color: #fefce8; /* 明るい黄色 */
 }
+
+.app-container {
+  /* ...既存のスタイル... */
+  padding-bottom: 80px; /* audio player の高さ分の余白を追加 */
+}
