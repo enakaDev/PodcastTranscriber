@@ -321,8 +321,7 @@ export default function SpotifyToRSS() {
     )}
 
       {selectedAudioUrl && (
-        <div className="audio-player-section">
-          <h2>エピソードを再生</h2>
+        <div className="audio-player-fixed">
           <audio ref={audioPlayerRef} src={selectedAudioUrl} controls className="audio-player" />
         </div>
       )}

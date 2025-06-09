@@ -108,12 +108,13 @@ input[type="text"] {
   background: #ffffff;
   border: 1px solid #e0e0e0;
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto; /* ブロック全体を中央揃えに */
   display: flex;
   flex-direction: column;
   text-align: left;
   gap: 1rem; /* 要素間のスペースを追加 */
+  font-size: 1.5rem;
 }
 
 /* レスポンシブデザインの追加 */
@@ -248,6 +249,18 @@ details[open] .icon {
   width: 100%; /* 横幅を100%に設定 */
   max-width: 600px; /* 最大幅を600pxに設定 */
   margin: 0 auto; /* 中央揃え */
+}
+
+/* 画面下部に固定するaudio player用 */
+.audio-player-fixed {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background: #fff;
+  z-index: 1000;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+  padding: 8px 0;
 }
 
 .result-detail h2 {
