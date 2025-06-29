@@ -7,7 +7,7 @@ interface Episode {
   description: string;
 }
 
-interface RssList {
+interface Channel {
   id: number;
   rss_url: string;
   title: string;
@@ -20,15 +20,15 @@ interface Transcription {
 }
 
 export default function SpotifyToRSS() {
-  const [rssList, setRssList] = useState<RssList[]>([]);
-  const [rssUrl, setRssUrl] = useState("");
+  const [channelList, setChannelList] = useState<Channel[]>([]);
+  const [selectedChannel, setSelectedChannel] = useState<Channel>({ id: 0, rss_url: "", title: "" });
   const [newRssUrl, setNewRssUrl] = useState("");
   const [delRssId, setDelRssId] = useState("");
   const [transcription, setTranscription] = useState<Transcription>({ original: "", translation: "", segments: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [episodes, setEpisodes] = useState<Episode[]>([]);
-  const [selectedAudioUrl, setSelectedAudioUrl] = useState<string>("");
+  const [selectedEpisode, setSelectedEpisode] = useState<Episode>({ title: "", audioUrl: "", description: "" });
   const [currentTime, setCurrentTime] = useState(0);
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
 
@@ -42,7 +42,7 @@ export default function SpotifyToRSS() {
     };
     audio.addEventListener("timeupdate", handler);
     return () => audio.removeEventListener("timeupdate", handler);
-  }, [selectedAudioUrl]);
+  }, [selectedEpisode]);
 
   // 環境変数をインポート
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -50,10 +50,10 @@ export default function SpotifyToRSS() {
 
   useEffect(() => {
     // サーバーからRSSリストを取得
-    fetch(`${url}rss-list`)
+    fetch(`${url}channel-list`)
       .then((response) => response.json())
-      .then((data) => setRssList(data.rssList || []))
-      .catch((error) => console.error('Error fetching RSS list:', error));
+      .then((data) => setChannelList(data.channelList || []))
+      .catch((error) => console.error('Error fetching channel list:', error));
   }, []);
 
   const fetchEpisodes = async () => {
@@ -64,7 +64,7 @@ export default function SpotifyToRSS() {
       const response = await fetch(`${url}episodes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rssUrl })
+        body: JSON.stringify({ channel: selectedChannel })
       });
 
       const data = await response.json();
@@ -80,7 +80,7 @@ export default function SpotifyToRSS() {
     }
   }
 
-  const fetchTranscription = async (audioUrl: string) => {
+  const fetchTranscription = async (episode: Episode) => {
     setLoading(true);
     setError("");
     setTranscription({ original: "", translation: "", segments: [] });
@@ -89,7 +89,7 @@ export default function SpotifyToRSS() {
       const response = await fetch(`${url}transcribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audioUrl })
+        body: JSON.stringify({ episode, channel: selectedChannel })
       });
 
       const data = await response.json();
@@ -119,9 +119,9 @@ export default function SpotifyToRSS() {
       if (!response.ok) {
         setError(data.error || "登録に失敗しました"); 
       }
-      fetch(`${url}rss-list`)
+      fetch(`${url}channel-list`)
       .then((response) => response.json())
-      .then((data) => setRssList(data.rssList || []))
+      .then((data) => setChannelList(data.channelList || []))
       .catch((error) => console.error('Error fetching RSS list:', error));
     } catch (err) {
       setError("エラーが発生しました");
@@ -144,10 +144,10 @@ export default function SpotifyToRSS() {
       if (!response.ok) {
         setError(data.error || "削除に失敗しました"); 
       }
-      fetch(`${url}rss-list`)
+      fetch(`${url}channel-list`)
       .then((response) => response.json())
-      .then((data) => setRssList(data.rssList || []))
-      .catch((error) => console.error('Error deleting RSS list:', error));
+      .then((data) => setChannelList(data.channelList || []))
+      .catch((error) => console.error('Error deleting channel list:', error));
     } catch (err) {
       setError("エラーが発生しました");
     } finally {
@@ -185,21 +185,26 @@ export default function SpotifyToRSS() {
         <div className="pre-registered-rss-section">
           <h2>登録済のチャンネルから選択</h2>
           <select 
-            className="rss-dropdown"
-            value={rssUrl}
-            onChange={(e) => setRssUrl(e.target.value)}
+            className="channel-dropdown"
+            value={selectedChannel.rss_url}
+            onChange={(e) => {
+              const selectedChannel = channelList.find(channel => channel.rss_url === e.target.value);
+              if (selectedChannel) {
+                setSelectedChannel(selectedChannel);
+              }
+            }}
           >
             <option value="">チャンネルを選択</option>
-            {rssList.map((rss, index) => (
-              <option key={index} value={rss.rss_url}>
-                {rss.title}
+            {channelList.map((channel, index) => (
+              <option key={index} value={channel.rss_url}>
+                {channel.title}
               </option>
             ))}
           </select>
           <button
             className="primary-button"
             onClick={fetchEpisodes}
-            disabled={!rssUrl || loading}
+            disabled={!selectedChannel || loading}
           >
             {loading ? "実行中..." : "エピソード取得"}
           </button>
@@ -236,9 +241,9 @@ export default function SpotifyToRSS() {
             onChange={(e) => setDelRssId(e.target.value)}
           >
             <option value="">チャンネルを選択</option>
-            {rssList.map((rss, index) => (
-              <option key={index} value={rss.id}>
-                {rss.title}
+            {channelList.map((channel, index) => (
+              <option key={index} value={channel.id}>
+                {channel.title}
               </option>
             ))}
           </select>
@@ -257,7 +262,12 @@ export default function SpotifyToRSS() {
         <h2>エピソードを選択</h2>
         <select
           className="episode-dropdown"
-          onChange={(e) => setSelectedAudioUrl(e.target.value)}
+          onChange={(e) => {
+            const selectedEpisode = episodes.find((episode) => episode.audioUrl === e.target.value);
+            if (selectedEpisode) {
+              setSelectedEpisode(selectedEpisode);
+            }
+          }}
         >
           <option value="">エピソードを選択</option>
           {episodes.map((episode) => (
@@ -268,7 +278,7 @@ export default function SpotifyToRSS() {
         </select>
         <button
           className="primary-button"
-          onClick={() => fetchTranscription(selectedAudioUrl)}
+          onClick={() => fetchTranscription(selectedEpisode)}
           disabled={loading}
         >
           {loading ? "実行中..." : "文字起こし実行"}
@@ -320,9 +330,9 @@ export default function SpotifyToRSS() {
       </div>
     )}
 
-      {selectedAudioUrl && (
+      {selectedEpisode && (
         <div className="audio-player-fixed">
-          <audio ref={audioPlayerRef} src={selectedAudioUrl} controls className="audio-player" />
+          <audio ref={audioPlayerRef} src={selectedEpisode.audioUrl} controls className="audio-player" />
         </div>
       )}
 

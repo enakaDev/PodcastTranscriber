@@ -82,7 +82,7 @@ a:hover {
 }
 
 /* ドロップダウンの幅を一定にする */
-.rss-dropdown,
+.channel-dropdown,
 .episode-dropdown {
   width: 500px; /* 幅を一定に設定 */
   padding: 0.5rem;
