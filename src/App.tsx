@@ -300,7 +300,7 @@ export default function SpotifyToRSS() {
           </div>
         )}
 
-        {transcription.translation && (
+        {/* {transcription.translation && (
           <div className="translation-section">
             <h2>翻訳結果</h2>
             <textarea
@@ -315,7 +315,7 @@ export default function SpotifyToRSS() {
               クリップボードにコピー
             </button>
           </div>
-        )}
+        )} */}
         </details>
       </div>
     )}
