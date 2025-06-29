@@ -19,14 +19,25 @@ type Bindings = {
 const app = new Hono<{ Bindings: Bindings }>()
 app.use('*', cors()) // CORS有効化
 
-// URL バリデーション用
-const rssSchema = z.object({
-	rssUrl: z.string().url(),
+const channelSchema = z.object({
+    channel: z.object({
+        id: z.number().int(),
+        rss_url: z.string().url(),
+        title: z.string()
+    })
 })
 
-// URL バリデーション用
-const audioSchema = z.object({
-	audioUrl: z.string().url(),
+const episodeSchema = z.object({
+	episode: z.object({
+        audioUrl: z.string().url(),
+        title: z.string(),
+        description: z.string().optional(),
+    }),
+    channel: z.object({
+        id: z.number().int(),
+        rss_url: z.string().url(),
+        title: z.string()
+    })
 })
 
 
@@ -48,8 +59,9 @@ export async function fetchAndParseRSS(url: string) {
     // 3. RSSフィードの中身にアクセスできる
     return parsed
 }
-app.post('/episodes', zValidator('json', rssSchema), async (c) => {
-    const { rssUrl } = await c.req.json()
+app.post('/episodes', zValidator('json', channelSchema), async (c) => {
+    const { channel } = await c.req.json();
+    const rssUrl = channel.rss_url;
 
     try {
         const feed = await fetchAndParseRSS(rssUrl);
@@ -81,8 +93,11 @@ interface TranslateResponse {
     }[];
 }
 
-app.post('/transcribe', zValidator('json', audioSchema), async (c) => {
-    const { audioUrl } = await c.req.json()
+app.post('/transcribe', zValidator('json', episodeSchema), async (c) => {
+    const { episode, channel } = await c.req.json();
+    const audioUrl = episode.audioUrl;
+    const episodeTitle = episode.title;
+    const channelTitle = channel.title;
 
     try {
         // Deepgram API へリクエスト
@@ -106,7 +121,7 @@ app.post('/transcribe', zValidator('json', audioSchema), async (c) => {
 
         await c.env.TRANSCRIPTION_BUCKET.put(
             // ファイル名としてチャンネル名とエピソード名を渡したい
-            `transcriptions/${audioUrl}.txt`,
+            `transcriptions/${channelTitle}_${episodeTitle}.txt`,
             new TextEncoder().encode(data),
             {
                 httpMetadata: {
@@ -143,18 +158,18 @@ app.post('/transcribe', zValidator('json', audioSchema), async (c) => {
     }
 });
 
-app.get('/rss-list', async (c) => {
+app.get('/channel-list', async (c) => {
     const result = await c.env.DB.prepare('SELECT * FROM podcasts ORDER BY id DESC').all();
     if (!result.results || result.results.length === 0)
         return c.json({})
     try {
-        const rssList = result.results.map((row) => ({
+        const channelList = result.results.map((row) => ({
             id: row.id,
             rss_url: row.rss_url,
             title: row.title,
         }));
         //const rssList = c.env.RSS_LINKS ?? [];
-        return c.json({ rssList });
+        return c.json({ channelList });
     } catch (error: any) {
         console.error("Error fetching RSS list:", error);
         return c.json({ error: "Failed to fetch RSS list", details: error.stack }, 500);
