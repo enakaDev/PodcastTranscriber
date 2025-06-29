@@ -13,6 +13,7 @@ type Bindings = {
         url: string
     }[],
     DB: D1Database;
+    TRANSCRIPTION_BUCKET: R2Bucket;
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -103,25 +104,37 @@ app.post('/transcribe', zValidator('json', audioSchema), async (c) => {
         const data = await result.results.channels[0].alternatives[0].transcript
         const segments = await result.results.channels[0].alternatives[0].paragraphs?.paragraphs.flatMap(p => p.sentences)
 
-        const res = await fetch(`https://api-free.deepl.com/v2/translate`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `DeepL-Auth-Key ${c.env.DEEPL_API_KEY}`,
-            },
-            body: JSON.stringify({
-                text: [data],
-                source_lang: 'EN', // 翻訳元の言語コード
-                target_lang: 'JA', // 翻訳先の言語コード
-            }),
-        });
-        const translatedResponse: TranslateResponse = await res.json(); 
+        await c.env.TRANSCRIPTION_BUCKET.put(
+            // ファイル名としてチャンネル名とエピソード名を渡したい
+            `transcriptions/${audioUrl}.txt`,
+            new TextEncoder().encode(data),
+            {
+                httpMetadata: {
+                    contentType: 'text/plain',
+                }
+            }
+        );
+
+        // const res = await fetch(`https://api-free.deepl.com/v2/translate`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         Authorization: `DeepL-Auth-Key ${c.env.DEEPL_API_KEY}`,
+        //     },
+        //     body: JSON.stringify({
+        //         text: [data],
+        //         source_lang: 'EN', // 翻訳元の言語コード
+        //         target_lang: 'JA', // 翻訳先の言語コード
+        //     }),
+        // });
+        // const translatedResponse: TranslateResponse = await res.json(); 
 
         return c.json({ 
             transcription: {
                 original: data,
                 segments : segments,
-                translation: translatedResponse.translations[0].text
+                //translation: translatedResponse.translations[0].text
+                translation: data // 一旦翻訳は無し
             }
         })
     } catch (error: any) {

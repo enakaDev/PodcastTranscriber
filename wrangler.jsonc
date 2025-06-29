@@ -31,16 +31,16 @@
       "database_id": "303efd41-7544-402c-9251-6cdcebcb3d1f"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "TRANSCRIPTION_BUCKET",
+      "bucket_name": "transcription-bucket"
+    }
+  ],
   // "kv_namespaces": [
   //   {
   //     "binding": "MY_KV_NAMESPACE",
   //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  //   }
-  // ],
-  // "r2_buckets": [
-  //   {
-  //     "binding": "MY_BUCKET",
-  //     "bucket_name": "my-bucket"
   //   }
   // ],
   // "d1_databases": [
