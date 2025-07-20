@@ -100,56 +100,99 @@ app.post('/transcribe', zValidator('json', episodeSchema), async (c) => {
     const channelTitle = channel.title;
 
     try {
-        // Deepgram API へリクエスト
-        const deepgramClient = createClient (c.env.DEEPGRAM_API_KEY);
-        const {result, error} = await deepgramClient.listen.prerecorded.transcribeUrl(
-        {
-            url: audioUrl,
-        },
-        {
-            model: "nova",
-            paragraphs: true,
-            diarize: true
-        }
+        let transcriptionResult: string;
+        let segmentsResult: any[] | undefined;
+        let translationResult: string;
+
+        const preSavedTranscription = await c.env.TRANSCRIPTION_BUCKET.get(
+            `transcriptions/${channelTitle}_${episodeTitle}.txt`
         );
-        if (error) {
-            return c.json({ error: "Deepgram API error", details: error }, 500);
-        }
-
-        const data = await result.results.channels[0].alternatives[0].transcript
-        const segments = await result.results.channels[0].alternatives[0].paragraphs?.paragraphs.flatMap(p => p.sentences)
-
-        await c.env.TRANSCRIPTION_BUCKET.put(
-            // ファイル名としてチャンネル名とエピソード名を渡したい
-            `transcriptions/${channelTitle}_${episodeTitle}.txt`,
-            new TextEncoder().encode(data),
+        const preSavedTranscriptionSegments = await c.env.TRANSCRIPTION_BUCKET.get(
+            `transcriptions_segments/${channelTitle}_${episodeTitle}_segments.json`
+        );
+        if (preSavedTranscription && preSavedTranscriptionSegments) {
+            transcriptionResult = await preSavedTranscription.text();
+            segmentsResult = JSON.parse(await preSavedTranscriptionSegments.text());
+        } else {
+            // Deepgram API へリクエスト
+            const deepgramClient = createClient (c.env.DEEPGRAM_API_KEY);
+            const {result, error} = await deepgramClient.listen.prerecorded.transcribeUrl(
             {
-                httpMetadata: {
-                    contentType: 'text/plain',
-                }
+                url: audioUrl,
+            },
+            {
+                model: "nova",
+                paragraphs: true,
+                diarize: true
             }
-        );
+            );
+            if (error) {
+                return c.json({ error: "Deepgram API error", details: error }, 500);
+            }
 
-        // const res = await fetch(`https://api-free.deepl.com/v2/translate`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         Authorization: `DeepL-Auth-Key ${c.env.DEEPL_API_KEY}`,
-        //     },
-        //     body: JSON.stringify({
-        //         text: [data],
-        //         source_lang: 'EN', // 翻訳元の言語コード
-        //         target_lang: 'JA', // 翻訳先の言語コード
-        //     }),
-        // });
-        // const translatedResponse: TranslateResponse = await res.json(); 
+            transcriptionResult = await result.results.channels[0].alternatives[0].transcript
+            segmentsResult = await result.results.channels[0].alternatives[0].paragraphs?.paragraphs.flatMap(p => p.sentences)
+
+            await c.env.TRANSCRIPTION_BUCKET.put(
+                `transcriptions/${channelTitle}_${episodeTitle}.txt`,
+                new TextEncoder().encode(transcriptionResult),
+                {
+                    httpMetadata: {
+                        contentType: 'text/plain',
+                    }
+                }
+            );
+            await c.env.TRANSCRIPTION_BUCKET.put(
+                `transcriptions_segments/${channelTitle}_${episodeTitle}_segments.json`,
+                JSON.stringify(segmentsResult),
+                {
+                    httpMetadata: {
+                        contentType: 'application/json',
+                    }
+                }
+            );
+        }
+
+        const preSavedTranslation = await c.env.TRANSCRIPTION_BUCKET.get(
+            `translations/${channelTitle}_${episodeTitle}.text`
+        );
+        if (preSavedTranslation) {
+            translationResult = await preSavedTranslation.text();
+        } else {
+            const res = await fetch(`https://api-free.deepl.com/v2/translate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `DeepL-Auth-Key ${c.env.DEEPL_API_KEY}`,
+                },
+                body: JSON.stringify({
+                    text: [transcriptionResult], // Deepgramからの文字起こし結果を翻訳
+                    source_lang: 'EN', // 翻訳元の言語コード
+                    target_lang: 'JA', // 翻訳先の言語コード
+                }),
+            });
+            const translatedResponse: TranslateResponse = await res.json(); 
+            if (!translatedResponse.translations || translatedResponse.translations.length === 0) {
+                return c.json({ error: "Translation failed" }, 500);
+            }
+            translationResult = translatedResponse.translations[0].text;
+
+            await c.env.TRANSCRIPTION_BUCKET.put(
+                `translations/${channelTitle}_${episodeTitle}.text`,
+                new TextEncoder().encode(translationResult),
+                {
+                    httpMetadata: {
+                        contentType: 'text/plain',
+                    }
+                }
+            );
+        }
 
         return c.json({ 
             transcription: {
-                original: data,
-                segments : segments,
-                //translation: translatedResponse.translations[0].text
-                translation: data // 一旦翻訳は無し
+                original: transcriptionResult,
+                segments : segmentsResult,
+                translation: translationResult
             }
         })
     } catch (error: any) {
