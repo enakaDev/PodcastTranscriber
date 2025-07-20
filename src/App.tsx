@@ -156,8 +156,8 @@ export default function SpotifyToRSS() {
   }
 
   //クリップボードにコピー関数
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(transcription.original);
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
   };
 
   useEffect(() => {
@@ -303,14 +303,14 @@ export default function SpotifyToRSS() {
             />
             <button
               className="copy-button"
-              onClick={() => copyToClipboard()}
+              onClick={() => copyToClipboard(transcription.original)}
             >
               クリップボードにコピー
             </button>
           </div>
         )}
 
-        {/* {transcription.translation && (
+        {transcription.translation && (
           <div className="translation-section">
             <h2>翻訳結果</h2>
             <textarea
@@ -320,12 +320,12 @@ export default function SpotifyToRSS() {
             />
             <button
               className="copy-button"
-              onClick={() => copyToClipboard()}
+              onClick={() => copyToClipboard(transcription.translation)}
             >
               クリップボードにコピー
             </button>
           </div>
-        )} */}
+        )}
         </details>
       </div>
     )}
