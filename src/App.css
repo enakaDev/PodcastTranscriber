@@ -83,6 +83,7 @@ a:hover {
 
 /* ドロップダウンの幅を一定にする */
 .channel-dropdown,
+.rss-dropdown,
 .episode-dropdown {
   width: 500px; /* 幅を一定に設定 */
   padding: 0.5rem;
@@ -124,6 +125,7 @@ input[type="text"] {
     padding: 1rem;
   }
 
+  .channel-dropdown,
   .rss-dropdown,
   .episode-dropdown {
     width: 100%; /* モバイルでは幅を100%に */
@@ -144,7 +146,7 @@ input[type="text"] {
   }
 
   .transcription-flow {
-    width: 95%;
+    width: 90%;
     padding: 1rem;
   }
 }
