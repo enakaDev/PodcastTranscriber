@@ -22,6 +22,8 @@ export default function Episodes() {
   const [selectedChannel, setSelectedChannel] = useState<Channel>({ id: 0, rss_url: "", title: "" });
   const [error, setError] = useState("");
   const [episodes, setEpisodes] = useState<Episode[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   const location = useLocation();
   const channel = location.state as { channel: Channel } | undefined;
@@ -77,13 +79,43 @@ export default function Episodes() {
     return `${date} ・ ${dur}`;
   }
 
+  // ページネーション用のロジック
+  const totalPages = Math.ceil(episodes.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentEpisodes = episodes.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  }
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  }
+
+  const handleFirstPage = () => {
+    setCurrentPage(1);
+  }
+
+  const handleLastPage = () => {
+    setCurrentPage(totalPages);
+  }
+
   return (
     <div className="app-container">
       <h1 className="app-title">{`${selectedChannel.title}`}</h1>
       <div className="episodes-grid">
-        {episodes.map((episode, index) => (
+        {currentEpisodes.map((episode, index) => (
           <Link to={`/episode/${episode.title}`} state={{ episode }}
-            key={`${index}-${episode.title}`} 
+            key={`${startIndex + index}-${episode.title}`} 
             className="episode-card"
           >
             <div className="episodeinfo">
@@ -100,6 +132,72 @@ export default function Episodes() {
             </div>
           </Link>
         ))}
+      </div>
+
+      {/* ページネーション */}
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button 
+            className="pagination-btn"
+            onClick={handleFirstPage}
+            disabled={currentPage === 1}
+          >
+            最初へ
+          </button>
+          
+          <button 
+            className="pagination-btn"
+            onClick={handlePrevPage}
+            disabled={currentPage === 1}
+          >
+            前へ
+          </button>
+          
+          <div className="pagination-pages">
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNumber;
+              if (totalPages <= 5) {
+                pageNumber = i + 1;
+              } else if (currentPage <= 3) {
+                pageNumber = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNumber = totalPages - 4 + i;
+              } else {
+                pageNumber = currentPage - 2 + i;
+              }
+              
+              return (
+                <button
+                  key={pageNumber}
+                  className={`pagination-page ${currentPage === pageNumber ? 'active' : ''}`}
+                  onClick={() => handlePageChange(pageNumber)}
+                >
+                  {pageNumber}
+                </button>
+              );
+            })}
+          </div>
+          
+          <button 
+            className="pagination-btn"
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+          >
+            次へ
+          </button>
+          
+          <button 
+            className="pagination-btn"
+            onClick={handleLastPage}
+            disabled={currentPage === totalPages}
+          >
+            最後へ
+          </button>
+        </div>
+      )}
+
+      <div className="pagination-info">
+        <p>{episodes.length}件中 {startIndex + 1}-{Math.min(endIndex, episodes.length)}件を表示</p>
       </div>
 
       {error && <p className="error-message">⚠️ {error}</p>}

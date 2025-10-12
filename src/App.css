@@ -590,3 +590,103 @@ details[open] .icon {
   min-width: unset; /* グローバルなmin-widthをリセット */
   border-radius: 6px;
 }
+
+/* ページネーションのスタイル */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  min-width: 80px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background-color: #ffffff;
+  color: #646cff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #646cff;
+  color: white;
+  border-color: #646cff;
+}
+
+.pagination-btn:disabled {
+  background-color: #f5f5f5;
+  color: #ccc;
+  cursor: not-allowed;
+  border-color: #e0e0e0;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.pagination-page {
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 0.9rem;
+  background-color: #ffffff;
+  color: #646cff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-page:hover {
+  background-color: #f0f0f0;
+  border-color: #646cff;
+}
+
+.pagination-page.active {
+  background-color: #646cff;
+  color: white;
+  border-color: #646cff;
+}
+
+.pagination-info {
+  text-align: center;
+  margin: 1rem 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.pagination-info p {
+  margin: 0;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .pagination {
+    gap: 0.25rem;
+  }
+  
+  .pagination-btn {
+    min-width: 60px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .pagination-page {
+    min-width: 36px;
+    width: 36px;
+    height: 36px;
+    font-size: 0.8rem;
+  }
+}
