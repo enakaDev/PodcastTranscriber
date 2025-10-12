@@ -1,5 +1,9 @@
-CREATE TABLE IF NOT EXISTS podcasts (
+DROP TABLE IF EXISTS podcasts;
+
+CREATE TABLE podcasts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   rss_url TEXT NOT NULL,
-  title TEXT
+  title TEXT,
+  image_url TEXT,
+  description TEXT
 );

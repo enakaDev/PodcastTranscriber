@@ -210,6 +210,8 @@ app.get('/channel-list', async (c) => {
             id: row.id,
             rss_url: row.rss_url,
             title: row.title,
+            image_url: row.image_url,
+            description: row.description,
         }));
         //const rssList = c.env.RSS_LINKS ?? [];
         return c.json({ channelList });
@@ -240,10 +242,12 @@ app.post('/channel-register', async (c) => {
         }
 
         const title = feed.rss.channel.title;
+        const description = feed.rss.channel.description || '';
+        const imageUrl = feed.rss.channel.image?.url || feed.rss.channel['itunes:image']?.['@_href'] || '';
 
         await c.env.DB.prepare(
-            `INSERT INTO podcasts (rss_url, title) VALUES (?, ?)`
-        ).bind(rss_url, title).run()
+            `INSERT INTO podcasts (rss_url, title, image_url, description) VALUES (?, ?, ?, ?)`
+        ).bind(rss_url, title, imageUrl, description).run()
     
         return c.json({ message: 'Podcast registered' }, 201)
     } catch (error: any) {
