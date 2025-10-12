@@ -75,7 +75,7 @@ export default function Channel() {
 
   const getEpisodeInfo = (pubDate: string, duration?: number) => {
     const date = new Date(pubDate).toLocaleDateString();
-    const dur = duration ? `${Math.floor(duration / 60)}:${duration % 60}` : "不明";
+    const dur = duration ? `${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, "0")}` : "不明";
     return `${date} ・ ${dur}`;
   }
 

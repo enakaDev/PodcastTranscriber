@@ -66,7 +66,7 @@ export default function ChannelList() {
       const response = await fetch(`${url}channel-delete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ delRssId: channelId.toString() })
+        body: JSON.stringify({ delRssId: channelId })
       });
       const data = await response.json();
       if (!response.ok) {
