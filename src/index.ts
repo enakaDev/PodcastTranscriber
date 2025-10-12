@@ -349,12 +349,12 @@ app.post('/transcribe', zValidator('json', episodeSchema), async (c) => {
 });
 
 app.get('/channel-list', async (c) => {
-    const result = await c.env.DB.prepare('SELECT * FROM podcasts ORDER BY id DESC').all();
+    const result = await c.env.DB.prepare('SELECT * FROM podcasts ORDER BY rowid DESC').all();
     if (!result.results || result.results.length === 0)
         return c.json({})
     try {
         const channelList = result.results.map((row) => ({
-            id: row.id,
+            id: row.rowid,
             rss_url: row.rss_url,
             title: row.title,
             image_url: row.image_url,
@@ -409,7 +409,7 @@ app.post('/channel-delete', async (c) => {
 
     try {
         await c.env.DB.prepare(
-            `DELETE FROM podcasts WHERE id = ${delRssId}`
+            `DELETE FROM podcasts WHERE rowid = ${delRssId}`
         ).run()
     
         return c.json({ message: 'Podcast deleted' }, 201)
