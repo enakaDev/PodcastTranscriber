@@ -1,10 +1,13 @@
-import { useState, useEffect, useRef } from "react";
-import "./App.css";
+import { useState, useEffect } from "react";
+import "../App.css";
+import { Link, useLocation } from "react-router-dom";
 
 interface Episode {
   title: string;
   audioUrl: string;
   description: string;
+  pubDate: string;
+  duration?: number;
 }
 
 interface Channel {
@@ -15,51 +18,34 @@ interface Channel {
   description?: string;
 }
 
-interface Transcription {
-  original: string;
-  translation: string;
-  segments: { start: number; end: number; text: string }[];
-}
-
 export default function Episodes() {
-  const [channelList, setChannelList] = useState<Channel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<Channel>({ id: 0, rss_url: "", title: "" });
-  const [newRssUrl, setNewRssUrl] = useState("");
-  const [delRssId, setDelRssId] = useState("");
-  const [transcription, setTranscription] = useState<Transcription>({ original: "", translation: "", segments: [] });
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [episodes, setEpisodes] = useState<Episode[]>([]);
-  const [selectedEpisode, setSelectedEpisode] = useState<Episode>({ title: "", audioUrl: "", description: "" });
-  const [currentTime, setCurrentTime] = useState(0);
-  const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
 
-  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const location = useLocation();
+  const channel = location.state as { channel: Channel } | undefined;
+
   useEffect(() => {
-    const audio = audioPlayerRef.current;
-    if (!audio) return;
+    if (channel) {
+      setSelectedChannel(channel.channel);
+    } else {
+      setError("チャンネル情報が見つかりません。チャンネル一覧からアクセスしてください。");
+    }
+  }, [channel]);
 
-    const handler = () => {
-      setCurrentTime(audio.currentTime);
-    };
-    audio.addEventListener("timeupdate", handler);
-    return () => audio.removeEventListener("timeupdate", handler);
-  }, [selectedEpisode]);
+  // selectedChannelが更新されたときにfetchEpisodesを実行
+  useEffect(() => {
+    if (selectedChannel.id !== 0 && selectedChannel.rss_url) {
+      fetchEpisodes();
+    }
+  }, [selectedChannel]);
 
   // 環境変数をインポート
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const url = backendUrl;
 
-  useEffect(() => {
-    // サーバーからRSSリストを取得
-    fetch(`${url}channel-list`)
-      .then((response) => response.json())
-      .then((data) => setChannelList(data.channelList || []))
-      .catch((error) => console.error('Error fetching channel list:', error));
-  }, []);
-
   const fetchEpisodes = async () => {
-    setLoading(true);
     setError("");
 
     try {
@@ -73,42 +59,48 @@ export default function Episodes() {
       if (response.ok) {
         setEpisodes(data.episodes);
       } else {
-        setError(data.error || "エピソードの取得に失敗しました");
+        // エラーがオブジェクトの場合は文字列に変換
+        const errorMessage = typeof data.error === 'object' 
+          ? JSON.stringify(data.error) 
+          : data.error || "エピソードの取得に失敗しました";
+        setError(errorMessage);
       }
     } catch (err) {
-      setError("エラーが発生しました");
-    } finally {
-      setLoading(false);
+      const errorMessage = err instanceof Error ? err.message : "エラーが発生しました";
+      setError(errorMessage);
     }
   }
 
-  useEffect(() => {
-    const el = document.getElementById(`segment-${currentSegmentIndex}`);
-    el?.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, [currentSegmentIndex]);
+  const getEpisodeInfo = (pubDate: string, duration?: number) => {
+    const date = new Date(pubDate).toLocaleDateString();
+    const dur = duration ? `${Math.floor(duration / 60)}:${duration % 60}` : "不明";
+    return `${date} ・ ${dur}`;
+  }
 
   return (
     <div className="app-container">
-      <h1 className="app-title">Podcast Transcriber</h1>
-      { episodes.length > 0 && (<div className="episode-section">
-        <h2>エピソードを選択</h2>
-        <select
-          className="episode-dropdown"
-          onChange={(e) => {
-            const selectedEpisode = episodes.find((episode) => episode.audioUrl === e.target.value);
-            if (selectedEpisode) {
-              setSelectedEpisode(selectedEpisode);
-            }
-          }}
-        >
-          <option value="">エピソードを選択</option>
-          {episodes.map((episode) => (
-            <option key={episode.audioUrl} value={episode.audioUrl}>
-              {episode.title}
-            </option>
-          ))}
-        </select>
-      </div>)}
+      <h1 className="app-title">{`${selectedChannel.title}`}</h1>
+      <div className="episodes-grid">
+        {episodes.map((episode, index) => (
+          <Link to={`/episode/${episode.title}`} state={{ episode }}
+            key={`${index}-${episode.title}`} 
+            className="episode-card"
+          >
+            <div className="episodeinfo">
+              <h3 className="episode-title">{episode.title}</h3>
+              <p className="episode-date-duration">{getEpisodeInfo(episode.pubDate, episode.duration)}</p>
+              <p className="episode-description">
+                {episode.description ? 
+                  (episode.description.length > 300 
+                    ? episode.description.substring(0, 300) + "..." 
+                    : episode.description)
+                  : "No description available"
+                }
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
 
       {error && <p className="error-message">⚠️ {error}</p>}
 

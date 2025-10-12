@@ -7,6 +7,7 @@ function AppRoute() {
     <BrowserRouter>
       <Routes>
         <Route path="/channels" element={<Channels />} />
+        <Route path="/episodes" element={<Episodes />} />
       </Routes>
     </BrowserRouter>
   );

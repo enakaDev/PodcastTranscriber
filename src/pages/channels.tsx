@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "../App.css";
+import { Link } from "react-router-dom";
 
 interface Channel {
   id: number;
@@ -90,11 +91,14 @@ export default function Channels() {
       <div className="rss-section">
         <div className="channels-grid">
           {channelList.map((channel) => (
-            <div key={channel.id} className="channel-card">
+            <Link to={`/episodes`} state={{ channel }}
+              key={channel.id} 
+              className="channel-card"
+            >
               <button 
                 className="delete-button"
                 onClick={(e) => {
-                  e.stopPropagation();
+                  e.preventDefault();
                   handleDeleteChannel(channel.id);
                 }}
                 title={`Delete ${channel.title}`}
@@ -121,13 +125,12 @@ export default function Channels() {
                   }
                 </p>
               </div>
-            </div>
+            </Link>
           ))}
           <div className="new-channel-card">
             <button 
               className={!showAddChannel ? "add-channel-button" : "add-channel-button-small"}
-              onClick={(e) => {
-                e.stopPropagation();
+              onClick={() => {
                 setShowAddChannel(!showAddChannel);
               }}
               title={`Add new channel`}

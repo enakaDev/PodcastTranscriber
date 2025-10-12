@@ -47,9 +47,6 @@ button {
   transition: background-color 0.3s;
   text-align: center;
 }
-button:hover {
-  background-color: #535bf2;
-}
 
 /* リンクのスタイルを改善 */
 a {
@@ -350,6 +347,73 @@ details[open] .icon {
 }
 
 .channel-description {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Spotifyライクなエピソードカードのスタイル */
+.episodes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(1fr));
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+  padding: 0;
+}
+
+.episode-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  position: relative;
+  padding: 1rem;;
+  text-align: left;
+}
+
+.episode-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #646cff;
+}
+
+.episode-info {
+  padding: 1.25rem;
+}
+
+.episode-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.episode-date-duration {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #666;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.episode-description {
   font-size: 0.9rem;
   color: #666;
   line-height: 1.5;
