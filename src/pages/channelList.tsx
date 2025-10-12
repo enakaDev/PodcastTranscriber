@@ -10,7 +10,7 @@ interface Channel {
   description?: string;
 }
 
-export default function Channels() {
+export default function ChannelList() {
   const [channelList, setChannelList] = useState<Channel[]>([]);
   const [newRssUrl, setNewRssUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -91,7 +91,7 @@ export default function Channels() {
       <div className="rss-section">
         <div className="channels-grid">
           {channelList.map((channel) => (
-            <Link to={`/episodes`} state={{ channel }}
+            <Link to={`/channel`} state={{ channel }}
               key={channel.id} 
               className="channel-card"
             >

@@ -18,7 +18,7 @@ interface Channel {
   description?: string;
 }
 
-export default function Episodes() {
+export default function Channel() {
   const [selectedChannel, setSelectedChannel] = useState<Channel>({ id: 0, rss_url: "", title: "" });
   const [error, setError] = useState("");
   const [episodes, setEpisodes] = useState<Episode[]>([]);
