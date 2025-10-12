@@ -22,8 +22,10 @@ app.use('*', cors()) // CORS有効化
 const channelSchema = z.object({
     channel: z.object({
         id: z.number().int(),
-        rss_url: z.string().url(),
-        title: z.string()
+        rss_url: z.string(),
+        title: z.string(),
+        image_url: z.string().optional(),
+        description: z.string().optional(),
     })
 })
 
@@ -74,15 +76,17 @@ app.post('/episodes', zValidator('json', channelSchema), async (c) => {
         return c.json({ 
         episodes: items.map(item => {
             return {
-            title: item.title,
-            audioUrl: item.enclosure["@_url"],
-            description: item.description
+                title: item.title,
+                audioUrl: item.enclosure["@_url"],
+                description: item.description,
+                pubDate: item.pubDate,
+                duration: item["itunes:duration"]
             }
         })
     })
     } catch (error: any) {
-        console.error("Error during transcription:", error);
-        return c.json({ error: "Transcription failed", details: error.stack }, 500);
+        console.error("Error during fetching episodes:", error);
+        return c.json({ error: "Failed to fetch episodes", details: error.stack }, 500);
     }
 });
 
