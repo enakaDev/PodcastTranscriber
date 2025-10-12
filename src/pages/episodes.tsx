@@ -114,7 +114,7 @@ export default function Episodes() {
       <h1 className="app-title">{`${selectedChannel.title}`}</h1>
       <div className="episodes-grid">
         {currentEpisodes.map((episode, index) => (
-          <Link to={`/episode/${episode.title}`} state={{ episode }}
+          <Link to={`/episode`} state={{ episode, channel: selectedChannel }}
             key={`${startIndex + index}-${episode.title}`} 
             className="episode-card"
           >
