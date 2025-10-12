@@ -11,6 +11,8 @@ interface Channel {
   id: number;
   rss_url: string;
   title: string;
+  image_url?: string;
+  description?: string;
 }
 
 interface Transcription {
