@@ -1,0 +1,61 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Use Node.js 18.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+
+    - name: Install dependencies
+      run: |
+        npm install
+        npm install --prefix ./frontend
+        npm install --prefix ./backend
+
+    - name: Build
+      run: npm run build --prefix ./frontend
+  
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install --prefix ./frontend
+          npm install --prefix ./backend
+
+      - name: Lint
+        run: npx biome check --colors=off
+
+      - name: Tests
+        run: |
+          npm run test --prefix ./frontend
+
+  deploy:
+    name: Deploy
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@master
+      - name: frontend deploy
+        run: npm run deploy --prefix ./frontend
+      - name: backend deploy
+        run: npm run deploy --prefix ./backend
