@@ -28,7 +28,7 @@ jobs:
 
       - name: Tests
         run: |
-          npm run test
+          vitest --prefix ./frontend
 
   deploy:
     name: Deploy
