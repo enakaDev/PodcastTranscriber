@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "../App.css";
 import { Link, useLocation } from "react-router-dom";
+import Breadcrumb from "../components/Breadcrumb";
 
 interface Episode {
   title: string;
@@ -112,8 +113,14 @@ export default function Channel() {
     setCurrentPage(totalPages);
   }
 
+  const breadcrumbItems = [
+    { label: "ホーム", path: "/" },
+    { label: selectedChannel.title || "エピソード一覧", active: true }
+  ];
+
   return (
     <div className="app-container">
+      <Breadcrumb items={breadcrumbItems} />
       <h1 className="app-title">{`${selectedChannel.title}`}</h1>
       <div className="episodes-grid">
         {currentEpisodes.map((episode, index) => (

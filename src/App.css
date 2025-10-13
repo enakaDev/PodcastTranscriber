@@ -690,3 +690,80 @@ details[open] .icon {
     font-size: 0.8rem;
   }
 }
+
+/* パンくずリストのスタイル */
+.breadcrumb {
+  margin: 1rem 0;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.breadcrumb-list {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.breadcrumb-link {
+  color: #646cff;
+  text-decoration: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.breadcrumb-link:hover {
+  background-color: #f0f0f0;
+  color: #535bf2;
+}
+
+.breadcrumb-current {
+  color: #333;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.breadcrumb-current.active {
+  color: #646cff;
+  font-weight: 600;
+}
+
+.breadcrumb-separator {
+  color: #999;
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .breadcrumb {
+    margin: 0.5rem 0;
+    padding: 0.5rem 0;
+  }
+  
+  .breadcrumb-list {
+    gap: 0.25rem;
+  }
+  
+  .breadcrumb-link,
+  .breadcrumb-current {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.4rem;
+  }
+  
+  .breadcrumb-separator {
+    font-size: 0.8rem;
+  }
+}

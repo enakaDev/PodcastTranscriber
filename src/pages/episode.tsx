@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "../App.css";
 import { useLocation } from "react-router-dom";
+import Breadcrumb from "../components/Breadcrumb";
 
 interface Episode {
   title: string;
@@ -152,8 +153,19 @@ export default function Episode() {
     el?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [currentSegmentIndex]);
 
+  const breadcrumbItems = [
+    { label: "ホーム", path: "/" },
+    { 
+      label: selectedChannel.title || "エピソード一覧", 
+      path: "/channel", 
+      state: { channel: selectedChannel } 
+    },
+    { label: selectedEpisode.title || "エピソード詳細", active: true }
+  ];
+
   return (
     <div className="app-container">
+      <Breadcrumb items={breadcrumbItems} />
       <h1 className="app-title">{`${selectedEpisode.title}`}</h1>
 
       {!isSaved && <button
