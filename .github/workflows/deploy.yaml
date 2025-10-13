@@ -67,11 +67,11 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: npm run deploy --prefix ./frontend
+          command: wrangler pages deploy dist --prefix ./frontend
         
       - name: backend deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: npm run deploy --prefix ./backend
+          command: wrangler deploy --minify --prefix ./backend
