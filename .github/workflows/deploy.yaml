@@ -55,7 +55,15 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@master
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install --prefix ./frontend
+          npm install --prefix ./backend
+
       - name: frontend deploy
         run: npm run deploy --prefix ./frontend
+        
       - name: backend deploy
         run: npm run deploy --prefix ./backend
