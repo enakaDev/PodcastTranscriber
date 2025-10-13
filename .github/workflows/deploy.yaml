@@ -67,7 +67,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy ./frontend/dist
+          command: pages deploy ./frontend/dist --project-name=podcasttranscriber --branch=main
         
       - name: backend deploy
         uses: cloudflare/wrangler-action@v3
