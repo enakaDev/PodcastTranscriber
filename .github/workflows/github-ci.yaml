@@ -28,9 +28,11 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    needs: build
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Lint
         run: npx biome check --colors=off
 
