@@ -32,12 +32,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install --prefix ./frontend
+          npm install --prefix ./backend
+
       - name: Lint
         run: npx biome check --colors=off
 
       - name: Tests
         run: |
-          npx vitest --prefix ./frontend
+          npm run test --prefix ./frontend
 
   deploy:
     name: Deploy
