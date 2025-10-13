@@ -1,6 +1,6 @@
 name: CI
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   build:
@@ -32,6 +32,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install --prefix ./frontend
+          npm install --prefix ./backend
 
       - name: Lint
         run: npx biome check --colors=off
