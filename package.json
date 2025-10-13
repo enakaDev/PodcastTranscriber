@@ -1,0 +1,10 @@
+{
+	"name": "podcast-transcriber",
+	"version": "1.0.0",
+	"description": "application to transcribe english podcast",
+	"scripts": {
+		"format": "npx biome format --write"
+	},
+	"author": "",
+	"license": "ISC"
+}
