@@ -7,7 +7,7 @@ interface Episode {
   audioUrl: string;
   description: string;
   pubDate: string;
-  duration?: number;
+  duration?: string;
 }
 
 interface Channel {
@@ -108,7 +108,7 @@ export default function Episode() {
     setTranscription({ original: "", translation: "", segments: [] });
 
     try {
-      const response = await fetch(`${url}transcribe`, {
+      const response = await fetch(`${url}get-new-transcription`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ episode, channel: selectedChannel })

@@ -7,7 +7,7 @@ interface Episode {
   audioUrl: string;
   description: string;
   pubDate: string;
-  duration?: number;
+  duration?: string;
 }
 
 interface Channel {
@@ -73,12 +73,12 @@ export default function Channel() {
     }
   }
 
-  const getEpisodeInfo = (pubDate: string, duration?: number) => {
+  const getEpisodeInfo = (pubDate: string, duration?: string) => {
     const date = new Date(pubDate).toLocaleDateString();
     const dur = duration
-      ? duration.toString().includes(":") || Number.isNaN(duration)
+      ? /:/.test(duration) || Number.isNaN(Number(duration))
         ? duration
-        : `${(Math.floor(duration / 3600)).toString().padStart(2, "0")}:${Math.floor((duration % 3600) / 60)}:${(duration % 60).toString().padStart(2, "0")}` : "不明";
+        : `${(Math.floor(Number(duration) / 3600)).toString().padStart(2, "0")}:${Math.floor((Number(duration) % 3600) / 60)}:${(Number(duration) % 60).toString().padStart(2, "0")}` : "不明";
     return `${date} ・ ${dur}`;
   }
 
