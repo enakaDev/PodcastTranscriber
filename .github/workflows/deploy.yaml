@@ -61,6 +61,7 @@ jobs:
           npm install
           npm install --prefix ./frontend
           npm install --prefix ./backend
+          npm install --save-dev wrangler@4.14.4
 
       - name: Build
         run: npm run build --prefix ./frontend
@@ -68,7 +69,6 @@ jobs:
       - name: frontend deploy
         uses: cloudflare/wrangler-action@v3
         with:
-          wrangler-version: '4.14.4'
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy ./frontend/dist --project-name=frontend --branch=main
@@ -76,7 +76,6 @@ jobs:
       - name: backend deploy
         uses: cloudflare/wrangler-action@v3
         with:
-          wrangler-version: '4.14.4'
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy --minify ./backend/wrangler.jsonc
