@@ -64,6 +64,12 @@ jobs:
 
       - name: frontend deploy
         run: npm run deploy --prefix ./frontend
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         
       - name: backend deploy
         run: npm run deploy --prefix ./backend
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
