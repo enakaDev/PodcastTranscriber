@@ -166,7 +166,7 @@ export default function Episode() {
   return (
     <div className="app-container">
       <Breadcrumb items={breadcrumbItems} />
-      <h1 className="app-title">{`${selectedEpisode.title}`}</h1>
+      <h2 className="app-title">{`${selectedEpisode.title}`}</h2>
 
       {!isSaved && <button
         className="primary-button"
@@ -230,6 +230,7 @@ export default function Episode() {
       <p></p> 
       { isSaved && transcription.segments.length > 0 && (
         <div className="transcription-flow">
+          <div className="segments-container">
           {transcription.segments.map((seg, i) => (
             <div
               key={i}
@@ -239,6 +240,7 @@ export default function Episode() {
               {seg.text}
             </div>
           ))}
+          </div>
         </div>
       )} 
 

@@ -10,7 +10,7 @@ body {
 /* #root のスタイルを調整 */
 #root {
   min-width: 768px;
-  max-width: 1280px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
@@ -78,19 +78,6 @@ a:hover {
   resize: none; /* サイズ変更を無効化 */
 }
 
-/* ドロップダウンの幅を一定にする */
-.channel-dropdown,
-.rss-dropdown,
-.episode-dropdown {
-  width: 500px; /* 幅を一定に設定 */
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-}
-
 /* input (type="text") の幅を一定にする */
 input[type="text"] {
   width: 480px; /* 幅を一定に設定 */
@@ -102,17 +89,19 @@ input[type="text"] {
 }
 
 .transcription-flow {
-  padding: 1rem;
   background: #ffffff;
   border: 1px solid #e0e0e0;
-  width: 100%;
-  max-width: 700px;
+  max-width: 900px;
   margin: 0 auto; /* ブロック全体を中央揃えに */
   display: flex;
   flex-direction: column;
   text-align: left;
   gap: 1rem; /* 要素間のスペースを追加 */
   font-size: 1.5rem;
+}
+
+.segments-container {
+  padding: 1rem;
 }
 
 /* レスポンシブデザインの追加 */
@@ -150,6 +139,8 @@ input[type="text"] {
 
 /* カード状のスタイルを追加 */
 details {
+  align-items: center;
+  margin: 0 auto; /* ブロック全体を中央揃えに */
   padding: 1rem;
   background: #ffffff;
   border: 1px solid #e0e0e0;
@@ -279,8 +270,9 @@ details[open] .icon {
 
 /* Spotifyライクなチャンネルカードのスタイル */
 .channels-grid {
+  max-width: 900px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px,1fr));
   gap: 1.5rem;
   margin: 1.5rem 0;
   padding: 0;
@@ -360,10 +352,11 @@ details[open] .icon {
 /* Spotifyライクなエピソードカードのスタイル */
 .episodes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(1fr));
+  grid-template-columns: 1fr;
   gap: 1.5rem;
   margin: 1.5rem 0;
   padding: 0;
+  max-width: 900px;
 }
 
 .episode-card {
@@ -375,7 +368,7 @@ details[open] .icon {
   overflow: hidden;
   border: 1px solid #e0e0e0;
   position: relative;
-  padding: 1rem;;
+  padding: 1rem;
   text-align: left;
 }
 
@@ -693,6 +686,7 @@ details[open] .icon {
 
 /* パンくずリストのスタイル */
 .breadcrumb {
+  width: 100%;
   margin: 1rem 0;
   padding: 0.75rem 0;
   border-bottom: 1px solid #e0e0e0;

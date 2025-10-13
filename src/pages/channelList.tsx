@@ -88,77 +88,74 @@ export default function ChannelList() {
   return (
     <div className="app-container">
       <h1 className="app-title">Podcast Transcriber</h1>
-      <div className="rss-section">
         <div className="channels-grid">
-          {channelList.map((channel) => (
-            <Link to={`/channel`} state={{ channel }}
-              key={channel.id} 
-              className="channel-card"
-            >
-              <button 
-                className="delete-button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleDeleteChannel(channel.id);
-                }}
-                title={`Delete ${channel.title}`}
-              >
-                ×
-              </button>
-              <div className="channel-image">
-                {channel.image_url ? (
-                  <img src={channel.image_url} alt={channel.title} />
-                ) : (
-                  <div className="placeholder-image">
-                    <span>🎙️</span>
-                  </div>
-                )}
-              </div>
-              <div className="channel-info">
-                <h3 className="channel-title">{channel.title}</h3>
-                <p className="channel-description">
-                  {channel.description ? 
-                    (channel.description.length > 100 
-                      ? channel.description.substring(0, 100) + "..." 
-                      : channel.description)
-                    : "No description available"
-                  }
-                </p>
-              </div>
-            </Link>
-          ))}
-          <div className="new-channel-card">
+        {channelList.map((channel) => (
+          <Link to={`/channel`} state={{ channel }}
+            key={channel.id} 
+            className="channel-card"
+          >
             <button 
-              className={!showAddChannel ? "add-channel-button" : "add-channel-button-small"}
-              onClick={() => {
-                setShowAddChannel(!showAddChannel);
+              className="delete-button"
+              onClick={(e) => {
+                e.preventDefault();
+                handleDeleteChannel(channel.id);
               }}
-              title={`Add new channel`}
+              title={`Delete ${channel.title}`}
             >
-              { !showAddChannel ? "+" : "×"} 
+              ×
             </button>
-            { showAddChannel && (
-              <div className="add-channel-form">
-                <input
-                  type="text"
-                  placeholder="RSSフィードのURLを入力"
-                  value={newRssUrl}
-                  onChange={(e) => setNewRssUrl(e.target.value)}
-                />
-                <button
-                  onClick={registerChannel}
-                  disabled={!newRssUrl || loading}
-                >
-                  {loading ? "実行中..." : "追加"}
-                </button>
-              </div>
-            )}
-          </div>
+            <div className="channel-image">
+              {channel.image_url ? (
+                <img src={channel.image_url} alt={channel.title} />
+              ) : (
+                <div className="placeholder-image">
+                  <span>🎙️</span>
+                </div>
+              )}
+            </div>
+            <div className="channel-info">
+              <h3 className="channel-title">{channel.title}</h3>
+              <p className="channel-description">
+                {channel.description ? 
+                  (channel.description.length > 100 
+                    ? channel.description.substring(0, 100) + "..." 
+                    : channel.description)
+                  : "No description available"
+                }
+              </p>
+            </div>
+          </Link>
+        ))}
+        <div className="new-channel-card">
+          <button 
+            className={!showAddChannel ? "add-channel-button" : "add-channel-button-small"}
+            onClick={() => {
+              setShowAddChannel(!showAddChannel);
+            }}
+            title={`Add new channel`}
+          >
+            { !showAddChannel ? "+" : "×"} 
+          </button>
+          { showAddChannel && (
+            <div className="add-channel-form">
+              <input
+                type="text"
+                placeholder="RSSフィードのURLを入力"
+                value={newRssUrl}
+                onChange={(e) => setNewRssUrl(e.target.value)}
+              />
+              <button
+                onClick={registerChannel}
+                disabled={!newRssUrl || loading}
+              >
+                {loading ? "実行中..." : "追加"}
+              </button>
+            </div>
+          )}
         </div>
-
-        {error && <p className="error-message">⚠️ {error}</p>}
-
       </div>
+
+      {error && <p className="error-message">⚠️ {error}</p>}
     </div>
   );
 }
