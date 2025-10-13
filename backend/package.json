@@ -1,7 +1,7 @@
 {
 	"name": "backend",
 	"scripts": {
-		"dev": "wrangler dev",
+		"dev": "wrangler dev --ip 0.0.0.0",
 		"deploy": "wrangler deploy --minify"
 	},
 	"dependencies": {

@@ -1,0 +1,28 @@
+services:
+  frontend:
+    container_name: podcast-frontend
+    hostname: podcast-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      NODE_ENV: development
+      VITE_BACKEND_URL: http://localhost:8787/
+    stdin_open: true
+    tty: true
+    command: npm run dev
+  backend:
+    container_name: podcast-backend
+    hostname: podcast-backend
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8787:8787"
+    environment:
+      NODE_ENV: development
+    stdin_open: true
+    tty: true
+    command: npm run dev
