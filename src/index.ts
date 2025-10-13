@@ -35,7 +35,7 @@ const episodeSchema = z.object({
         title: z.string(),
         description: z.string().optional(),
         pubDate: z.string(),
-        duration: z.number().optional(),
+        duration: z.string().optional(),
     }),
     channel: z.object({
         id: z.number().int(),
@@ -84,7 +84,7 @@ app.post('/episodes', zValidator('json', channelSchema), async (c) => {
                 audioUrl: item.enclosure["@_url"],
                 description: item.description,
                 pubDate: item.pubDate,
-                duration: item["itunes:duration"]
+                duration: typeof item["itunes:duration"] === "string" ? item["itunes:duration"] : item["itunes:duration"]?.toString()
             }
         })
     })
