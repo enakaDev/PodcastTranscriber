@@ -32,4 +32,4 @@ jobs:
 
       - name: Tests
         run: |
-          vitest --prefix ./frontend
+          npx vitest --prefix ./frontend
