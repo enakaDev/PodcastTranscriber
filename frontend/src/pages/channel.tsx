@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import "../App.css";
 import { Link, useLocation } from "react-router-dom";
 import Breadcrumb from "../components/Breadcrumb";
+import { getEpisodeInfo } from "../util";
 
 interface Episode {
 	title: string;
@@ -80,21 +81,6 @@ export default function Channel() {
 				err instanceof Error ? err.message : "エラーが発生しました";
 			setError(errorMessage);
 		}
-	};
-
-	const getEpisodeInfo = (pubDate: string, duration?: string) => {
-		const date = new Date(pubDate).toLocaleDateString();
-		const dur = duration
-			? /:/.test(duration) || Number.isNaN(Number(duration))
-				? duration
-				: `${Math.floor(Number(duration) / 3600)
-						.toString()
-						.padStart(
-							2,
-							"0",
-						)}:${Math.floor((Number(duration) % 3600) / 60)}:${(Number(duration) % 60).toString().padStart(2, "0")}`
-			: "不明";
-		return `${date} ・ ${dur}`;
 	};
 
 	// ページネーション用のロジック

@@ -5,7 +5,8 @@
 	"scripts": {
 		"format": "npx biome format --write",
 		"build": "npm run build --prefix ./frontend",
-		"deploy": "npm run deploy --prefix ./frontend && npm run deploy --prefix ./backend"
+		"deploy": "npm run deploy --prefix ./frontend && npm run deploy --prefix ./backend",
+		"test": "npm run test --prefix ./frontend"
 	},
 	"author": "",
 	"license": "ISC"
