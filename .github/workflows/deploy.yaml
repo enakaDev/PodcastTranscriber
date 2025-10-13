@@ -62,6 +62,9 @@ jobs:
           npm install --prefix ./frontend
           npm install --prefix ./backend
 
+      - name: Build
+        run: npm run build --prefix ./frontend
+
       - name: frontend deploy
         uses: cloudflare/wrangler-action@v3
         with:
