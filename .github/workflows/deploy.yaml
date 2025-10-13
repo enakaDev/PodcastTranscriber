@@ -18,11 +18,14 @@ jobs:
       with:
         node-version: '18.x'
 
-    - name: Install dependencies and run tests
+    - name: Install dependencies
       run: |
         npm install
         npm install --prefix ./frontend
         npm install --prefix ./backend
+
+    - name: Build
+      run: npm run build --prefix ./frontend
   
   test:
     name: Test
