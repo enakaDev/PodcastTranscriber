@@ -9,5 +9,8 @@
 		"test": "npm run test --prefix ./frontend"
 	},
 	"author": "",
-	"license": "ISC"
+	"license": "ISC",
+	"devDependencies": {
+		"lefthook": "^1.13.6"
+	}
 }
