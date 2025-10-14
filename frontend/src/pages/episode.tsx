@@ -21,7 +21,7 @@ interface Channel {
 
 interface Transcription {
 	original: string;
-	translation?: string;
+	translation?: string[];
 	segments: { start: number; end: number; text: string }[];
 }
 
@@ -33,7 +33,7 @@ export default function Episode() {
 	});
 	const [transcription, setTranscription] = useState<Transcription>({
 		original: "",
-		translation: undefined,
+		translation: [],
 		segments: [],
 	});
 	const [isSaved, setIsSaved] = useState<boolean>(false);
@@ -95,7 +95,7 @@ export default function Episode() {
 	const fetchPreSavedTranscription = async (episode: Episode) => {
 		setLoading(true);
 		setError("");
-		setTranscription({ original: "", translation: "", segments: [] });
+		setTranscription({ original: "", translation: [], segments: [] });
 
 		const requestData = { episode, channel: selectedChannel };
 
@@ -123,7 +123,7 @@ export default function Episode() {
 	const fetchNewTranscription = async (episode: Episode) => {
 		setLoading(true);
 		setError("");
-		setTranscription({ original: "", translation: "", segments: [] });
+		setTranscription({ original: "", translation: [], segments: [] });
 
 		try {
 			const response = await fetch(`${url}get-new-transcription`, {
@@ -227,12 +227,12 @@ export default function Episode() {
 								<h2>翻訳結果</h2>
 								<textarea
 									className="translation-textarea"
-									value={transcription.translation}
+									value={transcription.translation.join(" ")}
 									readOnly
 								/>
 								<button
 									className="copy-button"
-									onClick={() => copyToClipboard(transcription.translation)}
+									onClick={() => copyToClipboard(transcription.translation?.join(" "))}
 								>
 									クリップボードにコピー
 								</button>
@@ -254,21 +254,38 @@ export default function Episode() {
 			)}
 
 			<p></p>
-			{isSaved && transcription.segments.length > 0 && (
-				<div className="transcription-flow">
-					<div className="segments-container">
-						{transcription.segments.map((seg, i) => (
-							<div
-								key={i}
-								id={`segment-${i}`}
-								className={i === currentSegmentIndex ? "bg-yellow-200" : ""}
-							>
-								{seg.text}
-							</div>
-						))}
+			<div className="episode-flow">
+				{isSaved && transcription.segments.length > 0 && (
+					<div className="transcription-flow">
+						<div className="segments-container">
+							{transcription.segments.map((seg, i) => (
+								<div
+									key={i}
+									id={`segment-${i}`}
+									className={i === currentSegmentIndex ? "bg-yellow-200" : ""}
+								>
+									{seg.text}
+								</div>
+							))}
+						</div>
 					</div>
-				</div>
-			)}
+				)}
+				{isSaved && transcription.translation && transcription.translation.length > 0 && (
+					<div className="transcription-flow">
+						<div className="segments-container">
+							{transcription.translation.map((seg, i) => (
+								<div
+									key={i}
+									id={`segment-${i}`}
+									className={i === currentSegmentIndex ? "bg-yellow-200" : ""}
+								>
+									{seg}
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+			</div>
 		</div>
 	);
 }

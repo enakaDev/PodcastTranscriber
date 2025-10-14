@@ -176,7 +176,7 @@ app.post(
 		try {
 			let transcriptionResult: string;
 			let segmentsResult: any[] | undefined;
-			let translationResult: string | undefined;
+			let translationResult: string[] | undefined;
 
 			// Deepgram API へリクエスト
 			const deepgramClient = createClient(c.env.DEEPGRAM_API_KEY);
@@ -228,7 +228,7 @@ app.post(
 					Authorization: `DeepL-Auth-Key ${c.env.DEEPL_API_KEY}`,
 				},
 				body: JSON.stringify({
-					text: [transcriptionResult], // Deepgramからの文字起こし結果を翻訳
+					text: segmentsResult?.map(t => t.text), // Deepgramからの文字起こし結果を翻訳
 					source_lang: "EN", // 翻訳元の言語コード
 					target_lang: "JA", // 翻訳先の言語コード
 				}),
@@ -240,15 +240,15 @@ app.post(
 			) {
 				translationResult = undefined;
 			} else {
-				translationResult = translatedResponse.translations[0].text;
+				translationResult = translatedResponse.translations.map(t => t.text);
 			}
 
 			await c.env.TRANSCRIPTION_BUCKET.put(
-				`translations/${channelTitle}_${episodeTitle}.text`,
-				new TextEncoder().encode(translationResult),
+				`translations_segments/${channelTitle}_${episodeTitle}_segments.json`,
+				JSON.stringify(translationResult),
 				{
 					httpMetadata: {
-						contentType: "text/plain",
+						contentType: "application/json",
 					},
 				},
 			);

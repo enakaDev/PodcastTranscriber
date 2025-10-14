@@ -90,6 +90,15 @@ input[type="text"] {
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.episode-flow {
+	max-width: 900px;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+	gap: 1.5rem;
+	margin: 1.5rem 0;
+	padding: 0;
+}
+
 .transcription-flow {
 	background: #ffffff;
 	border: 1px solid #e0e0e0;
