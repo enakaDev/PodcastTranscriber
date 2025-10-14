@@ -47,6 +47,8 @@ export default function Episode() {
 	});
 	const [currentTime, setCurrentTime] = useState(0);
 	const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
+	const [shouldTranslate, setShouldTranslate] = useState(true);
+	const [activeTab, setActiveTab] = useState<"transcription" | "translation">("transcription");
 
 	const location = useLocation();
 	const channel = location.state.channel as Channel | undefined;
@@ -129,13 +131,16 @@ export default function Episode() {
 			const response = await fetch(`${url}get-new-transcription`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ episode, channel: selectedChannel }),
+				body: JSON.stringify({ episode, channel: selectedChannel, shouldTranslate }),
 			});
 
 			const data = await response.json();
 			if (response.ok) {
 				setTranscription(data.transcription);
 				setIsSaved(true);
+				if (!data.transcription.translation) {
+					setError("翻訳に失敗しました");
+				}
 			} else {
 				setIsSaved(false);
 				setError(data.error || "文字起こしに失敗しました");
@@ -185,7 +190,7 @@ export default function Episode() {
 			<Breadcrumb items={breadcrumbItems} />
 			<h2 className="app-title">{`${selectedEpisode.title}`}</h2>
 
-			{!isSaved && (
+			<div style={{ display: "flex", gap: "15px", alignItems: "center", justifyContent: "center" }}>
 				<button
 					className="primary-button"
 					onClick={() => fetchNewTranscription(selectedEpisode)}
@@ -193,9 +198,20 @@ export default function Episode() {
 				>
 					{loading ? "実行中..." : "文字起こし実行"}
 				</button>
-			)}
+				<label className="checkbox-label">
+					<input
+						type="checkbox"
+						className="custom-checkbox"
+						checked={shouldTranslate}
+						onChange={(e) => setShouldTranslate(e.target.checked)}
+					/>
+					<span className="checkbox-text">翻訳結果を取得する</span>
+				</label>
+			</div>
 
 			{error && <p className="error-message">⚠️ {error}</p>}
+
+			<p></p>
 
 			{isSaved && transcription.translation && transcription.original && (
 				<div className="result-detail">
@@ -254,7 +270,27 @@ export default function Episode() {
 			)}
 
 			<p></p>
-			<div className="episode-flow">
+
+			{/* タブ表示（モバイル用） */}
+			{isSaved && transcription.translation && transcription.translation.length > 0 && (
+				<div className="tabs-container-mobile">
+					<button
+						className={`tab-button ${activeTab === "transcription" ? "active" : ""}`}
+						onClick={() => setActiveTab("transcription")}
+					>
+						文字起こし
+					</button>
+					<button
+						className={`tab-button ${activeTab === "translation" ? "active" : ""}`}
+						onClick={() => setActiveTab("translation")}
+					>
+						翻訳
+					</button>
+				</div>
+			)}
+
+			{/* デスクトップ用の横並び表示 */}
+			<div className={`episode-flow-desktop ${transcription.translation && transcription.translation.length > 0 ? "episode-flow" : ""}`}>
 				{isSaved && transcription.segments.length > 0 && (
 					<div className="transcription-flow">
 						<div className="segments-container">
@@ -271,6 +307,40 @@ export default function Episode() {
 					</div>
 				)}
 				{isSaved && transcription.translation && transcription.translation.length > 0 && (
+					<div className="transcription-flow">
+						<div className="segments-container">
+							{transcription.translation.map((seg, i) => (
+								<div
+									key={i}
+									id={`segment-${i}`}
+									className={i === currentSegmentIndex ? "bg-yellow-200" : ""}
+								>
+									{seg}
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+			</div>
+
+			{/* モバイル用のタブコンテンツ表示 */}
+			<div className="episode-flow-mobile">
+				{isSaved && transcription.segments.length > 0 && activeTab === "transcription" && (
+					<div className="transcription-flow">
+						<div className="segments-container">
+							{transcription.segments.map((seg, i) => (
+								<div
+									key={i}
+									id={`segment-${i}`}
+									className={i === currentSegmentIndex ? "bg-yellow-200" : ""}
+								>
+									{seg.text}
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+				{isSaved && transcription.translation && transcription.translation.length > 0 && activeTab === "translation" && (
 					<div className="transcription-flow">
 						<div className="segments-container">
 							{transcription.translation.map((seg, i) => (
