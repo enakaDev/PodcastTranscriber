@@ -90,9 +90,19 @@ input[type="text"] {
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.episode-flow {
+	max-width: 900px;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1.5rem;
+	margin: 1.5rem 0;
+	padding: 0;
+}
+
 .transcription-flow {
 	background: #ffffff;
 	border: 1px solid #e0e0e0;
+	width: 100%;
 	max-width: 900px;
 	margin: 0 auto; /* ブロック全体を中央揃えに */
 	display: flex;
@@ -769,5 +779,144 @@ details[open] .icon {
 
 	.breadcrumb-separator {
 		font-size: 0.8rem;
+	}
+}
+
+/* タブ切り替え用のスタイル */
+.tabs-container-mobile {
+	display: none;
+}
+
+.tab-button {
+	flex: 1;
+	padding: 0.75rem 1.5rem;
+	font-size: 1rem;
+	color: #666;
+	background-color: #ffffff;
+	border: 1px solid #e0e0e0;
+	border-bottom: none;
+	cursor: pointer;
+	transition: all 0.3s;
+	min-width: 120px;
+}
+
+.tab-button:first-child {
+	border-radius: 8px 0 0 0;
+}
+
+.tab-button:last-child {
+	border-radius: 0 8px 0 0;
+}
+
+.tab-button.active {
+	color: #646cff;
+	background-color: #ffffff;
+	border-bottom: 3px solid #646cff;
+	font-weight: 600;
+}
+
+.tab-button:hover:not(.active) {
+	background-color: #f5f5f5;
+}
+
+/* モバイル用は非表示 */
+.episode-flow-mobile {
+	display: none;
+}
+
+/* レスポンシブ: 768px以下でタブ切り替え */
+@media (max-width: 768px) {
+	.tabs-container-mobile {
+		display: flex;
+		justify-content: center;
+		margin: 1rem 0;
+		gap: 0;
+		max-width: 600px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.episode-flow-desktop {
+		display: none;
+	}
+
+	.episode-flow-mobile {
+		display: block;
+	}
+
+	.episode-flow {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* カスタムチェックボックスのスタイル */
+.checkbox-label {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	cursor: pointer;
+	padding: 0.5rem 1rem;
+	border-radius: 6px;
+	transition: background-color 0.2s;
+	user-select: none;
+}
+
+.checkbox-label:hover {
+	background-color: #f5f5f5;
+}
+
+.custom-checkbox {
+	appearance: none;
+	width: 20px;
+	height: 20px;
+	border: 2px solid #646cff;
+	border-radius: 4px;
+	cursor: pointer;
+	position: relative;
+	transition: all 0.2s ease;
+	background-color: #ffffff;
+	flex-shrink: 0;
+}
+
+.custom-checkbox:hover {
+	border-color: #535bf2;
+	box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+}
+
+.custom-checkbox:checked {
+	background-color: #646cff;
+	border-color: #646cff;
+}
+
+.custom-checkbox:checked::after {
+	content: "";
+	position: absolute;
+	left: 5px;
+	top: 2px;
+	width: 6px;
+	height: 10px;
+	border: solid white;
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
+}
+
+.checkbox-text {
+	font-size: 1rem;
+	color: #333;
+	font-weight: 500;
+}
+
+@media (max-width: 768px) {
+	.checkbox-label {
+		padding: 0.4rem 0.8rem;
+	}
+
+	.custom-checkbox {
+		width: 18px;
+		height: 18px;
+	}
+
+	.checkbox-text {
+		font-size: 0.9rem;
 	}
 }

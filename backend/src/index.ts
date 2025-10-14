@@ -44,6 +44,7 @@ const episodeSchema = z.object({
 		image_url: z.string().optional(),
 		description: z.string().optional(),
 	}),
+	shouldTranslate: z.boolean().optional(),
 });
 
 export async function fetchAndParseRSS(url: string) {
@@ -133,10 +134,10 @@ app.post(
 				return c.json({ transcription: undefined });
 			}
 			const preSavedTranslation = await c.env.TRANSCRIPTION_BUCKET.get(
-				`translations/${channelTitle}_${episodeTitle}.text`,
+				`translations_segments/${channelTitle}_${episodeTitle}_segments.json`,
 			);
 			if (preSavedTranslation) {
-				translationResult = await preSavedTranslation.text();
+				translationResult = JSON.parse(await preSavedTranslation.text());
 			} else {
 				return c.json({
 					transcription: {
@@ -168,15 +169,16 @@ app.post(
 	"/get-new-transcription",
 	zValidator("json", episodeSchema),
 	async (c) => {
-		const { episode, channel } = await c.req.json();
+		const { episode, channel, shouldTranslate } = await c.req.json();
 		const audioUrl = episode.audioUrl;
 		const episodeTitle = episode.title;
 		const channelTitle = channel.title;
+		console.log(shouldTranslate)
 
 		try {
 			let transcriptionResult: string;
 			let segmentsResult: any[] | undefined;
-			let translationResult: string | undefined;
+			let translationResult: string[] | undefined;
 
 			// Deepgram API へリクエスト
 			const deepgramClient = createClient(c.env.DEEPGRAM_API_KEY);
@@ -221,6 +223,16 @@ app.post(
 				},
 			);
 
+			if (!shouldTranslate) {
+				return c.json({
+					transcription: {
+						original: transcriptionResult,
+						segments: segmentsResult,
+						translation: undefined,
+					},
+				});
+			}
+
 			const res = await fetch(`https://api-free.deepl.com/v2/translate`, {
 				method: "POST",
 				headers: {
@@ -228,11 +240,12 @@ app.post(
 					Authorization: `DeepL-Auth-Key ${c.env.DEEPL_API_KEY}`,
 				},
 				body: JSON.stringify({
-					text: [transcriptionResult], // Deepgramからの文字起こし結果を翻訳
+					text: segmentsResult?.map(t => t.text), // Deepgramからの文字起こし結果を翻訳
 					source_lang: "EN", // 翻訳元の言語コード
 					target_lang: "JA", // 翻訳先の言語コード
 				}),
 			});
+			console.log(res)
 			const translatedResponse: TranslateResponse = await res.json();
 			if (
 				!translatedResponse.translations ||
@@ -240,15 +253,15 @@ app.post(
 			) {
 				translationResult = undefined;
 			} else {
-				translationResult = translatedResponse.translations[0].text;
+				translationResult = translatedResponse.translations.map(t => t.text);
 			}
 
 			await c.env.TRANSCRIPTION_BUCKET.put(
-				`translations/${channelTitle}_${episodeTitle}.text`,
-				new TextEncoder().encode(translationResult),
+				`translations_segments/${channelTitle}_${episodeTitle}_segments.json`,
+				JSON.stringify(translationResult),
 				{
 					httpMetadata: {
-						contentType: "text/plain",
+						contentType: "application/json",
 					},
 				},
 			);
@@ -271,7 +284,7 @@ app.post(
 );
 
 app.post("/transcribe", zValidator("json", episodeSchema), async (c) => {
-	const { episode, channel } = await c.req.json();
+	const { episode, channel, shouldTranslate } = await c.req.json();
 	const audioUrl = episode.audioUrl;
 	const episodeTitle = episode.title;
 	const channelTitle = channel.title;
@@ -279,7 +292,7 @@ app.post("/transcribe", zValidator("json", episodeSchema), async (c) => {
 	try {
 		let transcriptionResult: string;
 		let segmentsResult: any[] | undefined;
-		let translationResult: string;
+		let translationResult: string[] | undefined;
 
 		const preSavedTranscription = await c.env.TRANSCRIPTION_BUCKET.get(
 			`transcriptions/${channelTitle}_${episodeTitle}.txt`,
@@ -335,11 +348,20 @@ app.post("/transcribe", zValidator("json", episodeSchema), async (c) => {
 			);
 		}
 
+		if (!shouldTranslate) {
+			return c.json({
+				transcription: {
+					original: transcriptionResult,
+					segments: segmentsResult,
+					translation: undefined,
+				},
+			});
+		}
 		const preSavedTranslation = await c.env.TRANSCRIPTION_BUCKET.get(
-			`translations/${channelTitle}_${episodeTitle}.text`,
+				`translations_segments/${channelTitle}_${episodeTitle}_segments.json`,
 		);
 		if (preSavedTranslation) {
-			translationResult = await preSavedTranslation.text();
+			translationResult = JSON.parse(await preSavedTranslation.text());
 		} else {
 			const res = await fetch(`https://api-free.deepl.com/v2/translate`, {
 				method: "POST",
@@ -348,7 +370,7 @@ app.post("/transcribe", zValidator("json", episodeSchema), async (c) => {
 					Authorization: `DeepL-Auth-Key ${c.env.DEEPL_API_KEY}`,
 				},
 				body: JSON.stringify({
-					text: [transcriptionResult], // Deepgramからの文字起こし結果を翻訳
+					text: segmentsResult?.map(t => t.text), // Deepgramからの文字起こし結果を翻訳
 					source_lang: "EN", // 翻訳元の言語コード
 					target_lang: "JA", // 翻訳先の言語コード
 				}),
@@ -360,14 +382,14 @@ app.post("/transcribe", zValidator("json", episodeSchema), async (c) => {
 			) {
 				return c.json({ error: "Translation failed" }, 500);
 			}
-			translationResult = translatedResponse.translations[0].text;
+			translationResult = translatedResponse.translations.map(t => t.text);
 
 			await c.env.TRANSCRIPTION_BUCKET.put(
-				`translations/${channelTitle}_${episodeTitle}.text`,
-				new TextEncoder().encode(translationResult),
+				`translations_segments/${channelTitle}_${episodeTitle}_segments.json`,
+				JSON.stringify(translationResult),
 				{
 					httpMetadata: {
-						contentType: "text/plain",
+						contentType: "application/json",
 					},
 				},
 			);

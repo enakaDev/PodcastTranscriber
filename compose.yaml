@@ -5,6 +5,9 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules
     ports:
       - "5173:5173"
     environment:
@@ -16,9 +19,12 @@ services:
   backend:
     container_name: podcast-backend
     hostname: podcast-backend
-    build: 
+    build:
       context: ./backend
       dockerfile: Dockerfile
+    volumes:
+      - ./backend:/backend
+      - /backend/node_modules
     ports:
       - "8787:8787"
     environment:
