@@ -16,7 +16,9 @@
 				"name": "Houston We Have a Podcast",
 				"url": "https://feeds.megaphone.fm/NATIONALAERONAUTICSANDSPACEADMINISTRATION1776343825"
 			}
-		]
+		],
+		"SESSION_COOKIE_NAME": "session_id",
+		"SESSION_TTL_SECONDS": 604800, // 7 days
 	},
 	"observability": {
 		"enabled": true,

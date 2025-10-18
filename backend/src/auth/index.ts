@@ -7,11 +7,8 @@ import dayjs from 'dayjs'
 // Worker bindings
 type Bindings = {
   DB: D1Database
-  GOOGLE_CLIENT_ID: string
-  GOOGLE_CLIENT_SECRET: string
-  GOOGLE_REDIRECT_URI: string
   SESSION_COOKIE_NAME: string
-  SESSION_TTL_SECONDS: string
+  SESSION_TTL_SECONDS: number
 }
 
 type Variables = {

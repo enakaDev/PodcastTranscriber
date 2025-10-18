@@ -13,6 +13,9 @@ services:
     environment:
       NODE_ENV: development
       VITE_BACKEND_URL: http://localhost:8787/
+      GOOGLE_CLIENT_ID: 1029882593349-scdm3ue251op8f8sm9fv69bv3kjeeffk.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: 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
+      GOOGLE_REDIRECT_URI: http://localhost:8787/auth/callback
     stdin_open: true
     tty: true
     command: npm run dev
