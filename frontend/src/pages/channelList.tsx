@@ -34,7 +34,6 @@ export default function ChannelList() {
 	const fetchUserId = async () => {
 		try {
 			const userIdRes = await getUserId();
-			console.log("Fetched User ID:", userIdRes);
 			setUserId(userIdRes);
 		} catch (err) {
 			setError("ユーザーIDの取得に失敗しました");
@@ -79,12 +78,6 @@ export default function ChannelList() {
 			if (!response.ok) {
 				setError(data.error || "登録に失敗しました");
 			}
-			/*
-			fetch(`${url}main/channel-list`)
-				.then((response) => response.json())
-				.then((data) => setChannelList(data.channelList || []))
-				.catch((error) => console.error("Error fetching RSS list:", error));
-			*/
 			fetchChannelList();
 		} catch (err) {
 			setError("エラーが発生しました");
@@ -111,13 +104,7 @@ export default function ChannelList() {
 			if (!response.ok) {
 				setError(data.error || "削除に失敗しました");
 			} else {
-				// 削除成功時にチャンネルリストを更新
-				fetch(`${url}main/channel-list`)
-					.then((response) => response.json())
-					.then((data) => setChannelList(data.channelList || []))
-					.catch((error) =>
-						console.error("Error fetching channel list:", error),
-					);
+				fetchChannelList();
 			}
 		} catch (err) {
 			setError("エラーが発生しました");
@@ -126,8 +113,28 @@ export default function ChannelList() {
 		}
 	};
 
+	const handleLogOut = async () => {
+		try {
+			await fetch(`${url}auth/logout`, {
+				method: "GET",
+				credentials: "include",
+			});
+			window.location.href = "/" 
+		} catch (err) {
+			setError("ログアウトに失敗しました");
+		}
+	}
+
 	return (
 		<div className="app-container">
+			<div className="right-header">
+				<div 
+					onClick={handleLogOut}
+					className="logout-button"
+				>
+				ログアウト
+				</div>
+			</div>
 			<h1 className="app-title">Podcast Transcriber</h1>
 			<div className="channels-grid">
 				{channelList.map((channel) => (

@@ -15,7 +15,6 @@
 		"lefthook": "^1.13.6"
 	},
 	"dependencies": {
-		"claude": "^0.1.2",
 		"dayjs": "^1.11.18",
 		"google-auth-library": "^10.4.1",
 		"googleapis": "^164.0.0",

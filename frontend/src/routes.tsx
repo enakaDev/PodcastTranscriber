@@ -10,7 +10,7 @@ function AppRoute() {
 			<Routes>
 				<Route path="/login" element={<Auth />} />
 				<Route path="/" element={<ChannelList />} />
-				<Route path="/Channel" element={<Episodes />} />
+				<Route path="/channel" element={<Episodes />} />
 				<Route path="/episode" element={<Episode />} />
 			</Routes>
 		</BrowserRouter>

@@ -93,7 +93,7 @@ app.get('/callback', async (c) => {
     expires: expiresAt.toDate()
   })
 
-  return c.redirect(`${c.env.FRONTEND_URL}`)  // フロントのURLにリダイレクト
+  return c.redirect(c.env.FRONTEND_URL)  // フロントのURLにリダイレクト
 })
 
 // セッション検証用ミドルウェア
@@ -117,7 +117,7 @@ app.get('/logout', async (c) => {
     await c.env.DB.prepare(`DELETE FROM sessions WHERE id=?`).bind(sessionId).run()
     deleteCookie(c, c.env.SESSION_COOKIE_NAME)
   }
-  return c.redirect('/')
+  return c.json({ success: true })
 })
 
 // 認証必須のAPIサンプル

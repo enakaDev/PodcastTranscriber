@@ -184,10 +184,30 @@ export default function Episode() {
 		},
 		{ label: selectedEpisode.title || "エピソード詳細", active: true },
 	];
+	
+	const handleLogOut = async () => {
+		try {
+			await fetch(`${url}auth/logout`, {
+				method: "GET",
+				credentials: "include",
+			});
+			window.location.href = "/" 
+		} catch (err) {
+			setError("ログアウトに失敗しました");
+		}
+	}
 
 	return (
 		<div className="app-container">
-			<Breadcrumb items={breadcrumbItems} />
+			<div className="app-header">
+				<Breadcrumb items={breadcrumbItems} />
+				<div 
+					onClick={handleLogOut}
+					className="logout-button"
+				>
+				ログアウト
+				</div>
+			</div>
 			<h2 className="app-title">{`${selectedEpisode.title}`}</h2>
 
 			<div style={{ display: "flex", gap: "15px", alignItems: "center", justifyContent: "center" }}>
