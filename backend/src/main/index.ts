@@ -173,7 +173,6 @@ app.post(
 		const audioUrl = episode.audioUrl;
 		const episodeTitle = episode.title;
 		const channelTitle = channel.title;
-		console.log(shouldTranslate)
 
 		try {
 			let transcriptionResult: string;
@@ -245,7 +244,6 @@ app.post(
 					target_lang: "JA", // 翻訳先の言語コード
 				}),
 			});
-			console.log(res)
 			const translatedResponse: TranslateResponse = await res.json();
 			if (
 				!translatedResponse.translations ||
@@ -408,10 +406,11 @@ app.post("/transcribe", zValidator("json", episodeSchema), async (c) => {
 	}
 });
 
-app.get("/channel-list", async (c) => {
+app.post("/channel-list", zValidator("json", z.object({userId: z.string()})), async (c) => {
+	const { userId } = await c.req.json();
 	const result = await c.env.DB.prepare(
-		"SELECT * FROM podcasts ORDER BY rowid DESC",
-	).all();
+		"SELECT * FROM podcasts WHERE user_id=? ORDER BY rowid DESC",
+	).bind(userId).all();
 	if (!result.results || result.results.length === 0) return c.json({});
 	try {
 		const channelList = result.results.map((row) => ({
@@ -435,6 +434,7 @@ app.get("/channel-list", async (c) => {
 // URL バリデーション用
 const newRssSchema = z.object({
 	newRssUrl: z.string().url(),
+	userId: z.string(),
 });
 app.post("/channel-register", async (c) => {
 	const body = await c.req.json();
@@ -445,6 +445,7 @@ app.post("/channel-register", async (c) => {
 	}
 
 	const rss_url = parsed.data.newRssUrl;
+	const userId = parsed.data.userId;
 
 	try {
 		const feed = await fetchAndParseRSS(rss_url);
@@ -460,9 +461,9 @@ app.post("/channel-register", async (c) => {
 			"";
 
 		await c.env.DB.prepare(
-			`INSERT INTO podcasts (rss_url, title, image_url, description) VALUES (?, ?, ?, ?)`,
+			`INSERT INTO podcasts (rss_url, user_id, title, image_url, description) VALUES (?, ?, ?, ?, ?)`,
 		)
-			.bind(rss_url, title, imageUrl, description)
+			.bind(rss_url, userId, title, imageUrl, description)
 			.run();
 
 		return c.json({ message: "Podcast registered" }, 201);

@@ -2,7 +2,6 @@ import { Hono } from 'hono'
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie'
 import dayjs from 'dayjs'
 import { cors } from 'hono/cors'
-import { createMiddleware } from 'hono/factory'
 
 // Worker bindings
 type Bindings = {
@@ -23,15 +22,12 @@ const app = new Hono<{ Bindings: Bindings, Variables: Variables }>()
 
 app.use(
   '*',
-  async (c, next) => {
-      cors({
-      origin: c.env.FRONTEND_URL, // フロントのURLを明示
-      allowMethods: ['GET', 'POST', 'OPTIONS'],
-      credentials: true,          // Cookieを許可
-    })
-    await next()
-  }
-);
+  cors({
+    origin: (_, c) => c.env.FRONTEND_URL, // 固定URLでもOK
+    allowMethods: ['GET', 'POST', 'OPTIONS'],
+    credentials: true,
+  })
+)
 
 // Google OAuth の認可URLにリダイレクト
 app.get('/login', (c) => {
@@ -92,12 +88,12 @@ app.get('/callback', async (c) => {
   setCookie(c, c.env.SESSION_COOKIE_NAME, sessionId, {
     httpOnly: true,
     secure: true,
-    sameSite: 'Lax',
+    sameSite: 'None',
     path: '/',
     expires: expiresAt.toDate()
   })
 
-  return c.redirect(`${c.env.FRONTEND_URL}channelList`)  // フロントのURLにリダイレクト
+  return c.redirect(`${c.env.FRONTEND_URL}/channelList`)  // フロントのURLにリダイレクト
 })
 
 // セッション検証用ミドルウェア
@@ -106,7 +102,7 @@ app.use('*', async (c, next) => {
   if (sessionId) {
     const row = await c.env.DB.prepare(
       `SELECT user_id FROM sessions WHERE id=? AND expires_at > ?`
-    ).bind(sessionId, dayjs()).first<{ user_id: string }>()
+    ).bind(sessionId, dayjs().format("YYYY-MM-DD HH:mm:ss")).first<{ user_id: string }>()
     if (row) {
       c.set('userId', row.user_id)
     }

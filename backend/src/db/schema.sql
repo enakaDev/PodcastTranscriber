@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS sessions;
 
 CREATE TABLE podcasts (
   rowid INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id TEXT NOT NULL,
   rss_url TEXT NOT NULL,
   title TEXT,
   image_url TEXT,
@@ -27,6 +28,6 @@ CREATE TABLE api_keys (
 
 CREATE TABLE sessions (
   id TEXT PRIMARY KEY,  
-  user_id INTEGER NOT NULL,
+  user_id TEXT NOT NULL,
   expires_at DATETIME NOT NULL
 );

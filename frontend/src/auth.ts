@@ -7,10 +7,9 @@ export const getUserId = async(): Promise<string> => {
         credentials: "include",
     });
 
-    if (res.status === 200) {
-        const data = await res.json();
-        return data.userId;
-    } else {
+    if (!res.ok) {
         throw new Error("Unauthorized");
     }
+    const data = await res.json();
+    return data.userId;
 }
