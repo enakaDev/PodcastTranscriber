@@ -1,47 +1,70 @@
 import { Hono } from 'hono'
-import { v4 as uuidv4 } from 'uuid'
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie'
-import { OAuth2Client } from 'google-auth-library'
 import dayjs from 'dayjs'
+import { cors } from 'hono/cors'
+import { createMiddleware } from 'hono/factory'
 
 // Worker bindings
 type Bindings = {
   DB: D1Database
   SESSION_COOKIE_NAME: string
   SESSION_TTL_SECONDS: number
+  FRONTEND_URL: string
+  GOOGLE_CLIENT_ID: string
+  GOOGLE_CLIENT_SECRET: string
+  GOOGLE_REDIRECT_URI: string
 }
 
 type Variables = {
-  userId? : string
+  userId?: string
 }
 
 const app = new Hono<{ Bindings: Bindings, Variables: Variables }>()
 
-const client = new OAuth2Client({
-  clientId: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  redirectUri: process.env.GOOGLE_REDIRECT_URI,
-})
+app.use(
+  '*',
+  async (c, next) => {
+      cors({
+      origin: c.env.FRONTEND_URL, // フロントのURLを明示
+      allowMethods: ['GET', 'POST', 'OPTIONS'],
+      credentials: true,          // Cookieを許可
+    })
+    await next()
+  }
+);
 
 // Google OAuth の認可URLにリダイレクト
-app.get('/auth/login', (c) => {
-  const authorizeUrl = client.generateAuthUrl({
-    access_type: 'offline',
-    scope: ['openid', 'email', 'profile'],
+app.get('/login', (c) => {
+  const params: URLSearchParams = new URLSearchParams({
+    response_type: 'code',
+    client_id: c.env.GOOGLE_CLIENT_ID,
+    redirect_uri: c.env.GOOGLE_REDIRECT_URI,
+    scope: 'openid email profile',
     state: crypto.randomUUID(),
-  });
-  return c.redirect(authorizeUrl);
+  })
+  return c.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`)
 })
 
 // Google OAuth のコールバック処理
-app.get('/auth/callback', async (c) => {
+app.get('/callback', async (c) => {
   const code = c.req.query('code')
   if (!code) return c.text('Missing code', 400)
 
   // 1. トークン取得
-  const { tokens } = await client.getToken(code);
-  client.setCredentials(tokens);
-
+  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      code,
+      client_id: c.env.GOOGLE_CLIENT_ID,
+      client_secret: c.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: c.env.GOOGLE_REDIRECT_URI,
+      grant_type: 'authorization_code'
+    })
+  })
+  const tokensJson = await tokenRes.json();
+  if (typeof tokensJson !== 'object' || !tokensJson ) return c.text('OAuth failed', 400)
+  const tokens = tokensJson as Record<string, string>;
   if (!tokens.id_token) return c.text('OAuth failed', 400)
   
     // 2. IDトークンからユーザ情報を取得
@@ -53,16 +76,15 @@ app.get('/auth/callback', async (c) => {
   await c.env.DB.prepare(`
     INSERT INTO users (id, email, provider, provider_user_id)
     VALUES (?, ?, 'google', ?)
-    ON CONFLICT(email) DO UPDATE SET email=email
+    ON CONFLICT(email) DO NOTHING
   `).bind(userId, userInfo.email, userInfo.sub).run()
 
   const row = await c.env.DB.prepare(`SELECT id FROM users WHERE email=?`).bind(userInfo.email).first<{ id: string }>()
   const finalUserId = row?.id
 
   // 4. セッション作成
-  const sessionId = uuidv4()
+  const sessionId = crypto.randomUUID()
   const expiresAt = dayjs().add(Number(c.env.SESSION_TTL_SECONDS), "second");
-  //const expiresAt = Math.floor(Date.now() / 1000) + Number(c.env.SESSION_TTL_SECONDS)
   await c.env.DB.prepare(`INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)`)
     .bind(sessionId, finalUserId, expiresAt.format("YYYY-MM-DD HH:mm:ss")).run()
 
@@ -75,7 +97,7 @@ app.get('/auth/callback', async (c) => {
     expires: expiresAt.toDate()
   })
 
-  return c.redirect('/')
+  return c.redirect(`${c.env.FRONTEND_URL}channelList`)  // フロントのURLにリダイレクト
 })
 
 // セッション検証用ミドルウェア
@@ -93,7 +115,7 @@ app.use('*', async (c, next) => {
 })
 
 // ログアウト
-app.get('/auth/logout', async (c) => {
+app.get('/logout', async (c) => {
   const sessionId = getCookie(c, c.env.SESSION_COOKIE_NAME)
   if (sessionId) {
     await c.env.DB.prepare(`DELETE FROM sessions WHERE id=?`).bind(sessionId).run()

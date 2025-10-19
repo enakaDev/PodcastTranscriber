@@ -114,7 +114,7 @@ export default function Channel() {
 	};
 
 	const breadcrumbItems = [
-		{ label: "ホーム", path: "/" },
+		{ label: "ホーム", path: "/ChannelList" },
 		{ label: selectedChannel.title || "エピソード一覧", active: true },
 	];
 

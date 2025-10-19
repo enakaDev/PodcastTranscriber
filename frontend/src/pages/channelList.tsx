@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "../App.css";
 import { Link } from "react-router-dom";
+import { getUserId } from "../auth";
 
 interface Channel {
 	id: number;
@@ -22,8 +23,11 @@ export default function ChannelList() {
 	const url = backendUrl;
 
 	useEffect(() => {
+		// セッション検証
+		const userId = getUserId()
+
 		// サーバーからRSSリストを取得
-		fetch(`${url}channel-list`)
+		fetch(`${url}main/channel-list`)
 			.then((response) => response.json())
 			.then((data) => setChannelList(data.channelList || []))
 			.catch((error) => console.error("Error fetching channel list:", error));
@@ -34,7 +38,7 @@ export default function ChannelList() {
 		setError("");
 
 		try {
-			const response = await fetch(`${url}channel-register`, {
+			const response = await fetch(`${url}main/channel-register`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ newRssUrl }),
@@ -43,7 +47,7 @@ export default function ChannelList() {
 			if (!response.ok) {
 				setError(data.error || "登録に失敗しました");
 			}
-			fetch(`${url}channel-list`)
+			fetch(`${url}main/channel-list`)
 				.then((response) => response.json())
 				.then((data) => setChannelList(data.channelList || []))
 				.catch((error) => console.error("Error fetching RSS list:", error));
@@ -63,7 +67,7 @@ export default function ChannelList() {
 		setError("");
 
 		try {
-			const response = await fetch(`${url}channel-delete`, {
+			const response = await fetch(`${url}main/channel-delete`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ delRssId: channelId }),
@@ -73,7 +77,7 @@ export default function ChannelList() {
 				setError(data.error || "削除に失敗しました");
 			} else {
 				// 削除成功時にチャンネルリストを更新
-				fetch(`${url}channel-list`)
+				fetch(`${url}main/channel-list`)
 					.then((response) => response.json())
 					.then((data) => setChannelList(data.channelList || []))
 					.catch((error) =>
