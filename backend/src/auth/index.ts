@@ -93,7 +93,7 @@ app.get('/callback', async (c) => {
     expires: expiresAt.toDate()
   })
 
-  return c.redirect(`${c.env.FRONTEND_URL}/channelList`)  // フロントのURLにリダイレクト
+  return c.redirect(`${c.env.FRONTEND_URL}`)  // フロントのURLにリダイレクト
 })
 
 // セッション検証用ミドルウェア

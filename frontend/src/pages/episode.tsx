@@ -102,7 +102,7 @@ export default function Episode() {
 		const requestData = { episode, channel: selectedChannel };
 
 		try {
-			const response = await fetch(`${url}get-saved-transcription`, {
+			const response = await fetch(`${url}main/get-saved-transcription`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(requestData),
@@ -128,7 +128,7 @@ export default function Episode() {
 		setTranscription({ original: "", translation: [], segments: [] });
 
 		try {
-			const response = await fetch(`${url}get-new-transcription`, {
+			const response = await fetch(`${url}main/get-new-transcription`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ episode, channel: selectedChannel, shouldTranslate }),
@@ -176,7 +176,7 @@ export default function Episode() {
 	}, [currentSegmentIndex]);
 
 	const breadcrumbItems = [
-		{ label: "ホーム", path: "/ChannelList" },
+		{ label: "ホーム", path: "/" },
 		{
 			label: selectedChannel.title || "エピソード一覧",
 			path: "/channel",

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { zValidator } from "@hono/zod-validator";
-import { number, z } from "zod";
+import { z } from "zod";
 import { XMLParser } from "fast-xml-parser";
 import { createClient } from "@deepgram/sdk";
 

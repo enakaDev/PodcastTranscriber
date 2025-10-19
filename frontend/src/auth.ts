@@ -8,7 +8,7 @@ export const getUserId = async(): Promise<string> => {
     });
 
     if (!res.ok) {
-        throw new Error("Unauthorized");
+        window.location.href = `./login`;
     }
     const data = await res.json();
     return data.userId;

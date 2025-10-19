@@ -59,7 +59,7 @@ export default function Channel() {
 		setError("");
 
 		try {
-			const response = await fetch(`${url}episodes`, {
+			const response = await fetch(`${url}main/episodes`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ channel: selectedChannel }),
@@ -114,7 +114,7 @@ export default function Channel() {
 	};
 
 	const breadcrumbItems = [
-		{ label: "ホーム", path: "/ChannelList" },
+		{ label: "ホーム", path: "/" },
 		{ label: selectedChannel.title || "エピソード一覧", active: true },
 	];
 
