@@ -79,19 +79,67 @@ export default function Episode() {
 	}, [selectedEpisode, selectedChannel]);
 
 	const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+	const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+
 	useEffect(() => {
 		const audio = audioPlayerRef.current;
 		if (!audio) return;
 
-		const wakeLock = enableWakeLock();
-		const handler = () => {
+		const requestWakeLock = async () => {
+			try {
+				if ('wakeLock' in navigator && !wakeLockRef.current) {
+					wakeLockRef.current = await navigator.wakeLock.request('screen');
+					console.log('Wake Lock activated');
+				}
+			} catch (err) {
+				console.error('Wake Lock error:', err);
+			}
+		};
+
+		const releaseWakeLock = async () => {
+			try {
+				if (wakeLockRef.current) {
+					await wakeLockRef.current.release();
+					wakeLockRef.current = null;
+					console.log('Wake Lock released');
+				}
+			} catch (err) {
+				console.error('Wake Lock release error:', err);
+			}
+		};
+
+		const handlePlay = () => {
+			requestWakeLock();
+		};
+
+		const handlePause = () => {
+			releaseWakeLock();
+		};
+
+		const handleTimeUpdate = () => {
 			setCurrentTime(audio.currentTime);
 		};
-		audio.addEventListener("timeupdate", handler);
+
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === 'visible' && !audio.paused) {
+				requestWakeLock();
+			}
+		};
+
+		audio.addEventListener('play', handlePlay);
+		audio.addEventListener('pause', handlePause);
+		audio.addEventListener('ended', handlePause);
+		audio.addEventListener('timeupdate', handleTimeUpdate);
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+
 		return () => {
-			audio.removeEventListener("timeupdate", handler);
-			disableWakeLock(wakeLock);
-		}
+			audio.removeEventListener('play', handlePlay);
+			audio.removeEventListener('pause', handlePause);
+			audio.removeEventListener('ended', handlePause);
+			audio.removeEventListener('timeupdate', handleTimeUpdate);
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+			releaseWakeLock();
+		};
 	}, [selectedEpisode]);
 
 	// 環境変数をインポート
@@ -188,16 +236,6 @@ export default function Episode() {
 		},
 		{ label: selectedEpisode.title || "エピソード詳細", active: true },
 	];
-
-	const enableWakeLock = async () => {
-		const wakeLock = await navigator.wakeLock.request('screen');
-		return wakeLock;
-	}
-	const disableWakeLock = async (wakeLock: any) => {
-		if (wakeLock) {
-			await wakeLock.release();
-		}
-	}
 
 	return (
 		<div className="app-container">
