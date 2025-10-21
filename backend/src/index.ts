@@ -120,25 +120,39 @@ app.post(
 			let segmentsResult: any[] | undefined;
 			let translationResult: string;
 
-			const preSavedTranscription = await c.env.TRANSCRIPTION_BUCKET.get(
-				`transcriptions/${channelTitle}_${episodeTitle}.txt`,
-			);
-			const preSavedTranscriptionSegments =
-				await c.env.TRANSCRIPTION_BUCKET.get(
-					`transcriptions_segments/${channelTitle}_${episodeTitle}_segments.json`,
+			try {
+				const preSavedTranscription = await c.env.TRANSCRIPTION_BUCKET.get(
+					`transcriptions/${channelTitle}_${episodeTitle}.txt`,
 				);
-			if (preSavedTranscription && preSavedTranscriptionSegments) {
-				transcriptionResult = await preSavedTranscription.text();
-				segmentsResult = JSON.parse(await preSavedTranscriptionSegments.text());
-			} else {
+				const preSavedTranscriptionSegments =
+					await c.env.TRANSCRIPTION_BUCKET.get(
+						`transcriptions_segments/${channelTitle}_${episodeTitle}_segments.json`,
+					);
+				if (preSavedTranscription && preSavedTranscriptionSegments) {
+					transcriptionResult = await preSavedTranscription.text();
+					segmentsResult = JSON.parse(await preSavedTranscriptionSegments.text());
+				} else {
+					return c.json({ transcription: undefined });
+				}
+			} catch (error) {
 				return c.json({ transcription: undefined });
 			}
-			const preSavedTranslation = await c.env.TRANSCRIPTION_BUCKET.get(
-				`translations_segments/${channelTitle}_${episodeTitle}_segments.json`,
-			);
-			if (preSavedTranslation) {
-				translationResult = JSON.parse(await preSavedTranslation.text());
-			} else {
+			try {
+				const preSavedTranslation = await c.env.TRANSCRIPTION_BUCKET.get(
+					`translations_segments/${channelTitle}_${episodeTitle}_segments.json`,
+				);
+				if (preSavedTranslation) {
+					translationResult = JSON.parse(await preSavedTranslation.text());
+				} else {
+					return c.json({
+						transcription: {
+							original: transcriptionResult,
+							segments: segmentsResult,
+							translation: undefined,
+						},
+					});
+				}
+			} catch (error) {
 				return c.json({
 					transcription: {
 						original: transcriptionResult,
@@ -173,7 +187,6 @@ app.post(
 		const audioUrl = episode.audioUrl;
 		const episodeTitle = episode.title;
 		const channelTitle = channel.title;
-		console.log(shouldTranslate)
 
 		try {
 			let transcriptionResult: string;
@@ -245,7 +258,6 @@ app.post(
 					target_lang: "JA", // 翻訳先の言語コード
 				}),
 			});
-			console.log(res)
 			const translatedResponse: TranslateResponse = await res.json();
 			if (
 				!translatedResponse.translations ||
