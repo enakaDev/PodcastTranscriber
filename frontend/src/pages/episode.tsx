@@ -83,11 +83,15 @@ export default function Episode() {
 		const audio = audioPlayerRef.current;
 		if (!audio) return;
 
+		const wakeLock = enableWakeLock();
 		const handler = () => {
 			setCurrentTime(audio.currentTime);
 		};
 		audio.addEventListener("timeupdate", handler);
-		return () => audio.removeEventListener("timeupdate", handler);
+		return () => {
+			audio.removeEventListener("timeupdate", handler);
+			disableWakeLock(wakeLock);
+		}
 	}, [selectedEpisode]);
 
 	// 環境変数をインポート
@@ -184,6 +188,16 @@ export default function Episode() {
 		},
 		{ label: selectedEpisode.title || "エピソード詳細", active: true },
 	];
+
+	const enableWakeLock = async () => {
+		const wakeLock = await navigator.wakeLock.request('screen');
+		return wakeLock;
+	}
+	const disableWakeLock = async (wakeLock: any) => {
+		if (wakeLock) {
+			await wakeLock.release();
+		}
+	}
 
 	return (
 		<div className="app-container">
