@@ -85,14 +85,28 @@ export default function Episode() {
 		const audio = audioPlayerRef.current;
 		if (!audio) return;
 
+		console.log('[Wake Lock] Initializing Wake Lock listeners');
+		console.log('[Wake Lock] Navigator.wakeLock available:', 'wakeLock' in navigator);
+
 		const requestWakeLock = async () => {
 			try {
-				if ('wakeLock' in navigator && !wakeLockRef.current) {
-					wakeLockRef.current = await navigator.wakeLock.request('screen');
-					console.log('Wake Lock activated');
+				if ('wakeLock' in navigator) {
+					if (wakeLockRef.current) {
+						console.log('[Wake Lock] Already active, skipping request');
+						return;
+					}
+					const wakeLock = await navigator.wakeLock!.request('screen');
+					wakeLockRef.current = wakeLock;
+					console.log('[Wake Lock] ✓ Activated successfully');
+
+					wakeLock.addEventListener('release', () => {
+						console.log('[Wake Lock] Released by system');
+					});
+				} else {
+					console.warn('[Wake Lock] ✗ API not supported in this browser');
 				}
-			} catch (err) {
-				console.error('Wake Lock error:', err);
+			} catch (err: any) {
+				console.error('[Wake Lock] ✗ Request failed:', err.name, err.message);
 			}
 		};
 
@@ -101,18 +115,20 @@ export default function Episode() {
 				if (wakeLockRef.current) {
 					await wakeLockRef.current.release();
 					wakeLockRef.current = null;
-					console.log('Wake Lock released');
+					console.log('[Wake Lock] ✓ Released manually');
 				}
 			} catch (err) {
-				console.error('Wake Lock release error:', err);
+				console.error('[Wake Lock] Release error:', err);
 			}
 		};
 
 		const handlePlay = () => {
+			console.log('[Wake Lock] Audio play event triggered');
 			requestWakeLock();
 		};
 
 		const handlePause = () => {
+			console.log('[Wake Lock] Audio pause event triggered');
 			releaseWakeLock();
 		};
 
@@ -121,7 +137,9 @@ export default function Episode() {
 		};
 
 		const handleVisibilityChange = () => {
+			console.log('[Wake Lock] Visibility changed:', document.visibilityState);
 			if (document.visibilityState === 'visible' && !audio.paused) {
+				console.log('[Wake Lock] Page visible and audio playing, re-requesting');
 				requestWakeLock();
 			}
 		};
@@ -133,6 +151,7 @@ export default function Episode() {
 		document.addEventListener('visibilitychange', handleVisibilityChange);
 
 		return () => {
+			console.log('[Wake Lock] Cleaning up');
 			audio.removeEventListener('play', handlePlay);
 			audio.removeEventListener('pause', handlePause);
 			audio.removeEventListener('ended', handlePause);
