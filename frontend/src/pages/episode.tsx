@@ -79,15 +79,86 @@ export default function Episode() {
 	}, [selectedEpisode, selectedChannel]);
 
 	const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+	const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+
 	useEffect(() => {
 		const audio = audioPlayerRef.current;
 		if (!audio) return;
 
-		const handler = () => {
+		console.log('[Wake Lock] Initializing Wake Lock listeners');
+		console.log('[Wake Lock] Navigator.wakeLock available:', 'wakeLock' in navigator);
+
+		const requestWakeLock = async () => {
+			try {
+				if ('wakeLock' in navigator) {
+					if (wakeLockRef.current) {
+						console.log('[Wake Lock] Already active, skipping request');
+						return;
+					}
+					const wakeLock = await navigator.wakeLock!.request('screen');
+					wakeLockRef.current = wakeLock;
+					console.log('[Wake Lock] ✓ Activated successfully');
+
+					wakeLock.addEventListener('release', () => {
+						console.log('[Wake Lock] Released by system');
+					});
+				} else {
+					console.warn('[Wake Lock] ✗ API not supported in this browser');
+				}
+			} catch (err: any) {
+				console.error('[Wake Lock] ✗ Request failed:', err.name, err.message);
+			}
+		};
+
+		const releaseWakeLock = async () => {
+			try {
+				if (wakeLockRef.current) {
+					await wakeLockRef.current.release();
+					wakeLockRef.current = null;
+					console.log('[Wake Lock] ✓ Released manually');
+				}
+			} catch (err) {
+				console.error('[Wake Lock] Release error:', err);
+			}
+		};
+
+		const handlePlay = () => {
+			console.log('[Wake Lock] Audio play event triggered');
+			requestWakeLock();
+		};
+
+		const handlePause = () => {
+			console.log('[Wake Lock] Audio pause event triggered');
+			releaseWakeLock();
+		};
+
+		const handleTimeUpdate = () => {
 			setCurrentTime(audio.currentTime);
 		};
-		audio.addEventListener("timeupdate", handler);
-		return () => audio.removeEventListener("timeupdate", handler);
+
+		const handleVisibilityChange = () => {
+			console.log('[Wake Lock] Visibility changed:', document.visibilityState);
+			if (document.visibilityState === 'visible' && !audio.paused) {
+				console.log('[Wake Lock] Page visible and audio playing, re-requesting');
+				requestWakeLock();
+			}
+		};
+
+		audio.addEventListener('play', handlePlay);
+		audio.addEventListener('pause', handlePause);
+		audio.addEventListener('ended', handlePause);
+		audio.addEventListener('timeupdate', handleTimeUpdate);
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+
+		return () => {
+			console.log('[Wake Lock] Cleaning up');
+			audio.removeEventListener('play', handlePlay);
+			audio.removeEventListener('pause', handlePause);
+			audio.removeEventListener('ended', handlePause);
+			audio.removeEventListener('timeupdate', handleTimeUpdate);
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+			releaseWakeLock();
+		};
 	}, [selectedEpisode]);
 
 	// 環境変数をインポート
