@@ -953,3 +953,235 @@ details[open] .icon {
 	color: #535bf2;
 	cursor: pointer;
 }
+
+.mypage-link {
+	margin: 1rem 0;
+	padding: 0.75rem 0;
+	color: #646cff;
+	text-decoration: none;
+	border-radius: 4px;
+	transition: all 0.2s ease;
+	font-size: 0.9rem;
+	font-weight: 600;
+	align-items: right;
+	max-width: 10%;
+	min-width: none; /* グローバルなmin-widthをオーバーライド */
+}
+
+.mypage-link:hover {
+	color: #535bf2;
+	cursor: pointer;
+}
+
+/* ユーザー情報のスタイル */
+.user-info {
+	max-width: 600px;
+	margin: 2rem auto;
+	background: #ffffff;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	padding: 2rem;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-info-row {
+	display: flex;
+	margin-bottom: 1.5rem;
+	align-items: baseline;
+}
+
+.user-info-row:last-child {
+	margin-bottom: 0;
+}
+
+.user-info-label {
+	flex: 0 0 160px;
+	font-weight: 600;
+	color: #333;
+	text-align: left;
+	font-size: 1rem;
+}
+
+.user-info-value {
+	flex: 1;
+	color: #666;
+	text-align: left;
+	word-break: break-all;
+	font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+	.user-info {
+		padding: 1.5rem;
+		margin: 1rem auto;
+	}
+
+	.user-info-row {
+		flex-direction: column;
+		margin-bottom: 1rem;
+	}
+
+	.user-info-label {
+		margin-bottom: 0.25rem;
+		font-size: 0.9rem;
+	}
+
+	.user-info-value {
+		font-size: 0.9rem;
+	}
+}
+
+/* APIキーセクションのスタイル */
+.api-keys-section {
+	max-width: 600px;
+	margin: 2rem auto;
+	background: #ffffff;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	padding: 2rem;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.api-keys-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1.5rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid #e0e0e0;
+}
+
+.api-keys-header h2 {
+	margin: 0;
+	font-size: 1.25rem;
+	font-weight: 600;
+	color: #333;
+}
+
+.edit-button {
+	min-width: 80px;
+	padding: 0.5rem 1rem;
+	font-size: 0.9rem;
+	background-color: #646cff;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background-color 0.3s;
+}
+
+.edit-button:hover {
+	background-color: #535bf2;
+}
+
+.api-keys-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.form-row {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.form-label {
+	font-weight: 600;
+	color: #333;
+	font-size: 0.95rem;
+	text-align: left;
+}
+
+.form-input {
+	width: 100%;
+	padding: 0.75rem;
+	font-size: 1rem;
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+	transition: border-color 0.3s, box-shadow 0.3s;
+	box-sizing: border-box;
+}
+
+.form-input:focus {
+	outline: none;
+	border-color: #646cff;
+	box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+}
+
+.form-input:disabled {
+	background-color: #f5f5f5;
+	color: #666;
+	cursor: not-allowed;
+}
+
+.form-actions {
+	display: flex;
+	gap: 1rem;
+	margin-top: 0.5rem;
+}
+
+.save-button,
+.cancel-button {
+	flex: 1;
+	min-width: 100px;
+	padding: 0.75rem 1.5rem;
+	font-size: 1rem;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background-color 0.3s, transform 0.1s;
+}
+
+.save-button {
+	background-color: #646cff;
+	color: white;
+}
+
+.save-button:hover {
+	background-color: #535bf2;
+}
+
+.save-button:active {
+	transform: scale(0.98);
+}
+
+.cancel-button {
+	background-color: #f0f0f0;
+	color: #333;
+}
+
+.cancel-button:hover {
+	background-color: #e0e0e0;
+}
+
+.cancel-button:active {
+	transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+	.api-keys-section {
+		padding: 1.5rem;
+		margin: 1rem auto;
+	}
+
+	.api-keys-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 1rem;
+	}
+
+	.edit-button {
+		width: 100%;
+	}
+
+	.form-actions {
+		flex-direction: column;
+	}
+
+	.save-button,
+	.cancel-button {
+		width: 100%;
+	}
+}
