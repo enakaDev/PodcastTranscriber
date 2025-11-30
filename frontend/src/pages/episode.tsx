@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import "../App.css";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Breadcrumb from "../components/Breadcrumb";
 
 interface Episode {
@@ -175,6 +175,7 @@ export default function Episode() {
 		try {
 			const response = await fetch(`${url}main/get-saved-transcription`, {
 				method: "POST",
+				credentials: "include",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(requestData),
 			});
@@ -201,6 +202,7 @@ export default function Episode() {
 		try {
 			const response = await fetch(`${url}main/get-new-transcription`, {
 				method: "POST",
+				credentials: "include",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ episode, channel: selectedChannel, shouldTranslate }),
 			});
@@ -255,28 +257,15 @@ export default function Episode() {
 		},
 		{ label: selectedEpisode.title || "エピソード詳細", active: true },
 	];
-	
-	const handleLogOut = async () => {
-		try {
-			await fetch(`${url}auth/logout`, {
-				method: "GET",
-				credentials: "include",
-			});
-			window.location.href = "/" 
-		} catch (err) {
-			setError("ログアウトに失敗しました");
-		}
-	}
 
 	return (
 		<div className="app-container">
 			<div className="app-header">
 				<Breadcrumb items={breadcrumbItems} />
-				<div 
-					onClick={handleLogOut}
-					className="logout-button"
-				>
-				ログアウト
+				<div className="mypage-link">
+					<Link to="/myPage">
+					マイページ
+					</Link>
 				</div>
 			</div>
 			<h2 className="app-title">{`${selectedEpisode.title}`}</h2>

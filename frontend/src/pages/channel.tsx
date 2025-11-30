@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "../App.css";
 import { Link, useLocation } from "react-router-dom";
 import Breadcrumb from "../components/Breadcrumb";
-import { getEpisodeInfo } from "../util";
+import { getEpisodeInfo } from "./util";
 
 interface Episode {
 	title: string;
@@ -118,27 +118,14 @@ export default function Channel() {
 		{ label: selectedChannel.title || "エピソード一覧", active: true },
 	];
 
-	const handleLogOut = async () => {
-		try {
-			await fetch(`${url}auth/logout`, {
-				method: "GET",
-				credentials: "include",
-			});
-			window.location.href = "/" 
-		} catch (err) {
-			setError("ログアウトに失敗しました");
-		}
-	}
-
 	return (
 		<div className="app-container">
 			<div className="app-header">
 				<Breadcrumb items={breadcrumbItems} />
-				<div 
-					onClick={handleLogOut}
-					className="logout-button"
-				>
-				ログアウト
+				<div className="mypage-link">
+					<Link to="/myPage">
+					マイページ
+					</Link>
 				</div>
 			</div>
 			<h1 className="app-title">{`${selectedChannel.title}`}</h1>

@@ -113,26 +113,13 @@ export default function ChannelList() {
 		}
 	};
 
-	const handleLogOut = async () => {
-		try {
-			await fetch(`${url}auth/logout`, {
-				method: "GET",
-				credentials: "include",
-			});
-			window.location.href = "/" 
-		} catch (err) {
-			setError("ログアウトに失敗しました");
-		}
-	}
-
 	return (
 		<div className="app-container">
 			<div className="right-header">
-				<div 
-					onClick={handleLogOut}
-					className="logout-button"
-				>
-				ログアウト
+				<div className="mypage-link">
+					<Link to="/myPage">
+					マイページ
+					</Link>
 				</div>
 			</div>
 			<h1 className="app-title">Podcast Transcriber</h1>
