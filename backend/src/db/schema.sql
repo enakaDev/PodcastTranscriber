@@ -1,9 +1,33 @@
 DROP TABLE IF EXISTS podcasts;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS api_keys;
+DROP TABLE IF EXISTS sessions;
 
 CREATE TABLE podcasts (
   rowid INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id TEXT NOT NULL,
   rss_url TEXT NOT NULL,
   title TEXT,
   image_url TEXT,
   description TEXT
+);
+
+CREATE TABLE users (
+  user_id TEXT PRIMARY KEY,  
+  email TEXT NOT NULL UNIQUE,
+  provider TEXT NOT NULL,
+  provider_user_id TEXT NOT NULL
+);
+
+CREATE TABLE api_keys (
+  user_id TEXT NOT NULL,
+  provider TEXT NOT NULL,
+  encrypted_key TEXT NOT NULL,
+  PRIMARY KEY (user_id, provider)
+);
+
+CREATE TABLE sessions (
+  id TEXT PRIMARY KEY,  
+  user_id TEXT NOT NULL,
+  expires_at DATETIME NOT NULL
 );

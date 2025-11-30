@@ -706,10 +706,9 @@ details[open] .icon {
 
 /* パンくずリストのスタイル */
 .breadcrumb {
-	width: 100%;
+	width: 80%;
 	margin: 1rem 0;
 	padding: 0.75rem 0;
-	border-bottom: 1px solid #e0e0e0;
 }
 
 .breadcrumb-list {
@@ -919,4 +918,38 @@ details[open] .icon {
 	.checkbox-text {
 		font-size: 0.9rem;
 	}
+}
+
+.app-header {
+	border-bottom: 1px solid #e0e0e0;
+	display: flex;
+	justify-content: space-between;
+}
+
+.right-header {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	padding: 1rem 0;
+	margin-bottom: 1rem;
+	border-bottom: 1px solid #e0e0e0;
+}
+
+.logout-button {
+	margin: 1rem 0;
+	padding: 0.75rem 0;
+	color: #646cff;
+	text-decoration: none;
+	border-radius: 4px;
+	transition: all 0.2s ease;
+	font-size: 0.9rem;
+	font-weight: 600;
+	align-items: right;
+	max-width: 10%;
+	min-width: none; /* グローバルなmin-widthをオーバーライド */
+}
+
+.logout-button:hover {
+	color: #535bf2;
+	cursor: pointer;
 }

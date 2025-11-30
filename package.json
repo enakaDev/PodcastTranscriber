@@ -1,6 +1,7 @@
 {
 	"name": "podcast-transcriber",
 	"version": "1.0.0",
+	"type": "module",
 	"description": "application to transcribe english podcast",
 	"scripts": {
 		"format": "npx biome format --write",
@@ -12,5 +13,11 @@
 	"license": "ISC",
 	"devDependencies": {
 		"lefthook": "^1.13.6"
+	},
+	"dependencies": {
+		"dayjs": "^1.11.18",
+		"google-auth-library": "^10.4.1",
+		"googleapis": "^164.0.0",
+		"uuid": "^13.0.0"
 	}
 }

@@ -59,7 +59,7 @@ export default function Channel() {
 		setError("");
 
 		try {
-			const response = await fetch(`${url}episodes`, {
+			const response = await fetch(`${url}main/episodes`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ channel: selectedChannel }),
@@ -118,9 +118,29 @@ export default function Channel() {
 		{ label: selectedChannel.title || "エピソード一覧", active: true },
 	];
 
+	const handleLogOut = async () => {
+		try {
+			await fetch(`${url}auth/logout`, {
+				method: "GET",
+				credentials: "include",
+			});
+			window.location.href = "/" 
+		} catch (err) {
+			setError("ログアウトに失敗しました");
+		}
+	}
+
 	return (
 		<div className="app-container">
-			<Breadcrumb items={breadcrumbItems} />
+			<div className="app-header">
+				<Breadcrumb items={breadcrumbItems} />
+				<div 
+					onClick={handleLogOut}
+					className="logout-button"
+				>
+				ログアウト
+				</div>
+			</div>
 			<h1 className="app-title">{`${selectedChannel.title}`}</h1>
 			<div className="episodes-grid">
 				{currentEpisodes.map((episode, index) => (

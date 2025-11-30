@@ -173,7 +173,7 @@ export default function Episode() {
 		const requestData = { episode, channel: selectedChannel };
 
 		try {
-			const response = await fetch(`${url}get-saved-transcription`, {
+			const response = await fetch(`${url}main/get-saved-transcription`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(requestData),
@@ -199,7 +199,7 @@ export default function Episode() {
 		setTranscription({ original: "", translation: [], segments: [] });
 
 		try {
-			const response = await fetch(`${url}get-new-transcription`, {
+			const response = await fetch(`${url}main/get-new-transcription`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ episode, channel: selectedChannel, shouldTranslate }),
@@ -255,10 +255,30 @@ export default function Episode() {
 		},
 		{ label: selectedEpisode.title || "エピソード詳細", active: true },
 	];
+	
+	const handleLogOut = async () => {
+		try {
+			await fetch(`${url}auth/logout`, {
+				method: "GET",
+				credentials: "include",
+			});
+			window.location.href = "/" 
+		} catch (err) {
+			setError("ログアウトに失敗しました");
+		}
+	}
 
 	return (
 		<div className="app-container">
-			<Breadcrumb items={breadcrumbItems} />
+			<div className="app-header">
+				<Breadcrumb items={breadcrumbItems} />
+				<div 
+					onClick={handleLogOut}
+					className="logout-button"
+				>
+				ログアウト
+				</div>
+			</div>
 			<h2 className="app-title">{`${selectedEpisode.title}`}</h2>
 
 			<div style={{ display: "flex", gap: "15px", alignItems: "center", justifyContent: "center" }}>
