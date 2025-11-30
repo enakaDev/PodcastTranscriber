@@ -2,6 +2,8 @@ import { Hono } from 'hono'
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie'
 import dayjs from 'dayjs'
 import { cors } from 'hono/cors'
+import { z } from 'zod'
+import { zValidator } from '@hono/zod-validator'
 
 // Worker bindings
 type Bindings = {
@@ -70,13 +72,13 @@ app.get('/callback', async (c) => {
   // 3. ユーザを DB に保存 or 取得
   const userId = crypto.randomUUID()
   await c.env.DB.prepare(`
-    INSERT INTO users (id, email, provider, provider_user_id)
+    INSERT INTO users (user_id, email, provider, provider_user_id)
     VALUES (?, ?, 'google', ?)
     ON CONFLICT(email) DO NOTHING
   `).bind(userId, userInfo.email, userInfo.sub).run()
 
-  const row = await c.env.DB.prepare(`SELECT id FROM users WHERE email=?`).bind(userInfo.email).first<{ id: string }>()
-  const finalUserId = row?.id
+  const row = await c.env.DB.prepare(`SELECT user_id FROM users WHERE email=?`).bind(userInfo.email).first<{ user_id: string }>()
+  const finalUserId = row?.user_id
 
   // 4. セッション作成
   const sessionId = crypto.randomUUID()
@@ -125,6 +127,48 @@ app.get('/me', (c) => {
   const userId = c.get('userId')
   if (!userId) return c.text('Unauthorized', 401)
   return c.json({ userId })
+})
+
+// user情報を一括で取得する処理
+app.get('/userInfo', async (c) => {
+  const userId = c.get('userId')
+  if (!userId) return c.text('Unauthorized', 401)
+  const users = await c.env.DB.prepare(`SELECT * FROM users WHERE user_id = ?`).bind(userId).first<{user_id: string, email: string}>();
+  const deepgramKey = await c.env.DB.prepare(`SELECT * FROM api_keys WHERE user_id = ? AND provider = 'deepgram'`).bind(userId).first<{encrypted_key: string}>();
+  const deeplKey = await c.env.DB.prepare(`SELECT * FROM api_keys WHERE user_id = ? AND provider = 'deepl'`).bind(userId).first<{encrypted_key: string}>();
+  return c.json({
+    userId,
+    email: users?.email,
+    apiKey: {
+      deepgram: deepgramKey?.encrypted_key,
+      deepl: deeplKey?.encrypted_key
+    }
+  })
+})
+
+const apiKeySchema = z.object({
+  deepgram: z.string().optional(),
+  deepl: z.string().optional(),
+})
+
+// APIキー保存処理
+app.post("/saveApiKeys", zValidator("json", apiKeySchema), async (c) => {
+  const userId = c.get('userId')
+  if (!userId) return c.text('Unauthorized', 401)
+  const { deepgram, deepl } = await c.req.json();
+  if (deepgram) {
+    await c.env.DB.prepare(`
+      INSERT OR REPLACE INTO api_keys (user_id, provider, encrypted_key)
+      VALUES (?, 'deepgram', ?)
+    `).bind(userId, deepgram).run()
+  }
+  if (deepl) {
+    await c.env.DB.prepare(`
+      INSERT OR REPLACE INTO api_keys (user_id, provider, encrypted_key)
+      VALUES (?, 'deepl', ?)
+    `).bind(userId, deepl).run()
+  }
+  return c.json({ success: true })
 })
 
 // JWT デコード関数（署名検証省略）

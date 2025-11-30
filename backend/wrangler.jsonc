@@ -5,18 +5,6 @@
 	"compatibility_date": "2025-03-28",
 	"compatibility_flags": ["nodejs_compat"],
 	"vars": {
-		"DEEPGRAM_API_KEY": "e2ec23adfc5cd0de756b650003d2b6579bdbe7cf",
-		"DEEPL_API_KEY": "26972cea-9bc5-47dd-a469-2924532c6d4a:fx",
-		"RSS_LINKS": [
-			{
-				"name": "Small Steps, Giant Leaps",
-				"url": "https://feeds.megaphone.fm/NATIONALAERONAUTICSANDSPACEADMINISTRATION5360639309"
-			},
-			{
-				"name": "Houston We Have a Podcast",
-				"url": "https://feeds.megaphone.fm/NATIONALAERONAUTICSANDSPACEADMINISTRATION1776343825"
-			}
-		],
 		"SESSION_COOKIE_NAME": "session_id",
 		"SESSION_TTL_SECONDS": 604800
 	},

@@ -13,17 +13,17 @@ CREATE TABLE podcasts (
 );
 
 CREATE TABLE users (
-  id TEXT PRIMARY KEY,  
+  user_id TEXT PRIMARY KEY,  
   email TEXT NOT NULL UNIQUE,
   provider TEXT NOT NULL,
   provider_user_id TEXT NOT NULL
 );
 
 CREATE TABLE api_keys (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id TEXT NOT NULL,
   provider TEXT NOT NULL,
-  encrypted_key TEXT NOT NULL
+  encrypted_key TEXT NOT NULL,
+  PRIMARY KEY (user_id, provider)
 );
 
 CREATE TABLE sessions (

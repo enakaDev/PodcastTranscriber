@@ -4,20 +4,58 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { XMLParser } from "fast-xml-parser";
 import { createClient } from "@deepgram/sdk";
+import { getCookie } from "hono/cookie";
+import dayjs from "dayjs";
 
 type Bindings = {
-	DEEPGRAM_API_KEY: string;
-	DEEPL_API_KEY: string;
 	RSS_LINKS: {
 		name: string;
 		url: string;
 	}[];
 	DB: D1Database;
 	TRANSCRIPTION_BUCKET: R2Bucket;
+	SESSION_COOKIE_NAME: string
+	SESSION_TTL_SECONDS: number
 };
 
-const app = new Hono<{ Bindings: Bindings }>();
-app.use("*", cors()); // CORS有効化
+type Variables = {
+  userId?: string;
+  deepgramApiKey?: string;
+  deeplApiKey?: string;
+}
+
+const app = new Hono<{ Bindings: Bindings, Variables: Variables }>();
+app.use(
+	'*',
+	cors({
+		origin: (_, c) => c.env.FRONTEND_URL, // 固定URLでもOK
+		allowMethods: ['GET', 'POST', 'OPTIONS'],
+		credentials: true,
+	})
+)
+
+// セッション検証＆API KEY取得ミドルウェア
+app.use("*", async (c, next) => {
+	const sessionId = getCookie(c, c.env.SESSION_COOKIE_NAME)
+	if (sessionId) {
+		const row = await c.env.DB.prepare(
+		  `SELECT user_id FROM sessions WHERE id=? AND expires_at > ?`
+		).bind(sessionId, dayjs().format("YYYY-MM-DD HH:mm:ss")).first<{ user_id: string }>()
+		if (row) {
+		 	c.set('userId', row.user_id)
+			const userId = row.user_id;
+			const deepgramKey = await c.env.DB.prepare(`SELECT * FROM api_keys WHERE user_id = ? AND provider = 'deepgram'`).bind(userId).first<{encrypted_key: string}>();
+			if (deepgramKey) {
+				c.set('deepgramApiKey', deepgramKey.encrypted_key);
+			}
+			const deeplKey = await c.env.DB.prepare(`SELECT * FROM api_keys WHERE user_id = ? AND provider = 'deepl'`).bind(userId).first<{encrypted_key: string}>();
+			if (deeplKey) {
+				c.set('deeplApiKey', deeplKey.encrypted_key);
+			}
+		}
+	}
+	await next();
+});
 
 const channelSchema = z.object({
 	channel: z.object({
@@ -174,13 +212,18 @@ app.post(
 		const episodeTitle = episode.title;
 		const channelTitle = channel.title;
 
+		const deepgramApiKey = c.get('deepgramApiKey');
+		if (!deepgramApiKey) {
+			return c.json({ error: "Deepgram API key not found" }, 500);
+		}
+
 		try {
 			let transcriptionResult: string;
 			let segmentsResult: any[] | undefined;
 			let translationResult: string[] | undefined;
 
 			// Deepgram API へリクエスト
-			const deepgramClient = createClient(c.env.DEEPGRAM_API_KEY);
+			const deepgramClient = createClient(deepgramApiKey);
 			const { result, error } =
 				await deepgramClient.listen.prerecorded.transcribeUrl(
 					{
@@ -232,11 +275,15 @@ app.post(
 				});
 			}
 
+			const deeplApiKey = c.get('deeplApiKey');
+			if (!deeplApiKey) {
+				return c.json({ error: "DeepL API key not found" }, 500);
+			}
 			const res = await fetch(`https://api-free.deepl.com/v2/translate`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: `DeepL-Auth-Key ${c.env.DEEPL_API_KEY}`,
+					Authorization: `DeepL-Auth-Key ${deeplApiKey}`,
 				},
 				body: JSON.stringify({
 					text: segmentsResult?.map(t => t.text), // Deepgramからの文字起こし結果を翻訳
@@ -303,7 +350,11 @@ app.post("/transcribe", zValidator("json", episodeSchema), async (c) => {
 			segmentsResult = JSON.parse(await preSavedTranscriptionSegments.text());
 		} else {
 			// Deepgram API へリクエスト
-			const deepgramClient = createClient(c.env.DEEPGRAM_API_KEY);
+			const deepgramApiKey = c.get('deepgramApiKey');
+			if (!deepgramApiKey) {
+				return c.json({ error: "Deepgram API key not found" }, 500);
+			}
+			const deepgramClient = createClient(deepgramApiKey);
 			const { result, error } =
 				await deepgramClient.listen.prerecorded.transcribeUrl(
 					{
@@ -361,11 +412,15 @@ app.post("/transcribe", zValidator("json", episodeSchema), async (c) => {
 		if (preSavedTranslation) {
 			translationResult = JSON.parse(await preSavedTranslation.text());
 		} else {
+			const deeplApiKey = c.get('deeplApiKey');
+			if (!deeplApiKey) {
+				return c.json({ error: "DeepL API key not found" }, 500);
+			}
 			const res = await fetch(`https://api-free.deepl.com/v2/translate`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: `DeepL-Auth-Key ${c.env.DEEPL_API_KEY}`,
+					Authorization: `DeepL-Auth-Key ${deeplApiKey}`,
 				},
 				body: JSON.stringify({
 					text: segmentsResult?.map(t => t.text), // Deepgramからの文字起こし結果を翻訳
