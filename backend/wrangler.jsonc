@@ -6,7 +6,11 @@
 	"compatibility_flags": ["nodejs_compat"],
 	"vars": {
 		"SESSION_COOKIE_NAME": "session_id",
-		"SESSION_TTL_SECONDS": 604800
+		"SESSION_TTL_SECONDS": 604800,
+		"FRONTEND_URL": "https://frontend-anj.pages.dev",
+		"GOOGLE_REDIRECT_URI": "https://backend.transcriber.workers.dev/auth/callback",
+		"GOOGLE_CLIENT_ID": "1029882593349-scdm3ue251op8f8sm9fv69bv3kjeeffk.apps.googleusercontent.com",
+		"GOOGLE_CLIENT_SECRET": "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"
 	},
 	"observability": {
 		"enabled": true,
