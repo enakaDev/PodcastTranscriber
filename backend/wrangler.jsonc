@@ -8,9 +8,7 @@
 		"SESSION_COOKIE_NAME": "session_id",
 		"SESSION_TTL_SECONDS": 604800,
 		"FRONTEND_URL": "https://frontend-anj.pages.dev",
-		"GOOGLE_REDIRECT_URI": "https://backend.transcriber.workers.dev/auth/callback",
-		"GOOGLE_CLIENT_ID": "1029882593349-kf89c19otahvnod7a46rmmbn8buok8ko.apps.googleusercontent.com",
-		"GOOGLE_CLIENT_SECRET": "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"
+		"GOOGLE_REDIRECT_URI": "https://backend.transcriber.workers.dev/auth/callback"
 	},
 	"observability": {
 		"enabled": true,
