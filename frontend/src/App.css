@@ -116,6 +116,34 @@ input[type="text"] {
 	padding: 1rem;
 }
 
+/* 新しいグリッドレイアウト */
+.segments-grid {
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+	width: 100%;
+	max-width: 900px;
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.segment-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1rem;
+	align-items: stretch; /* 高さを揃える */
+}
+
+.segment-cell {
+	background: #ffffff;
+	padding: 0 1rem 0 1rem;
+	text-align: left;
+	font-size: 1.5rem;
+	display: flex;
+	align-items: flex-start;
+}
+
 /* レスポンシブデザインの追加 */
 @media (max-width: 768px) {
 	#root {
@@ -845,6 +873,15 @@ details[open] .icon {
 
 	.episode-flow {
 		grid-template-columns: 1fr;
+	}
+
+	/* モバイルでは横並びを解除 */
+	.segment-row {
+		grid-template-columns: 1fr;
+	}
+
+	.segment-cell {
+		font-size: 1.2rem;
 	}
 }
 

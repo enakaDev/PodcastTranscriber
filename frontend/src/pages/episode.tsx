@@ -370,35 +370,26 @@ export default function Episode() {
 			)}
 
 			{/* デスクトップ用の横並び表示 */}
-			<div className={`episode-flow-desktop ${transcription.translation && transcription.translation.length > 0 ? "episode-flow" : ""}`}>
+			<div className="episode-flow-desktop">
 				{isSaved && transcription.segments.length > 0 && (
-					<div className="transcription-flow">
-						<div className="segments-container">
-							{transcription.segments.map((seg, i) => (
+					<div className="segments-grid">
+						{transcription.segments.map((seg, i) => (
+							<div key={i} className="segment-row">
 								<div
-									key={i}
 									id={`segment-${i}`}
-									className={i === currentSegmentIndex ? "bg-yellow-200" : ""}
+									className={`segment-cell ${i === currentSegmentIndex ? "bg-yellow-200" : ""}`}
 								>
 									{seg.text}
 								</div>
-							))}
-						</div>
-					</div>
-				)}
-				{isSaved && transcription.translation && transcription.translation.length > 0 && (
-					<div className="transcription-flow">
-						<div className="segments-container">
-							{transcription.translation.map((seg, i) => (
-								<div
-									key={i}
-									id={`segment-${i}`}
-									className={i === currentSegmentIndex ? "bg-yellow-200" : ""}
-								>
-									{seg}
-								</div>
-							))}
-						</div>
+								{transcription.translation && transcription.translation.length > i && (
+									<div
+										className={`segment-cell ${i === currentSegmentIndex ? "bg-yellow-200" : ""}`}
+									>
+										{transcription.translation[i]}
+									</div>
+								)}
+							</div>
+						))}
 					</div>
 				)}
 			</div>
